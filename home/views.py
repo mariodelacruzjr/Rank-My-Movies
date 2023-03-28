@@ -15,7 +15,9 @@ def HomeView(request):
         
         'trending_all_week_results': trending_all_week_results
     }
-    return render(request,'index.html',context)
+    return render(request,'home.html',context)
+
+
 
 @login_required
 def DashBoardView(request):
