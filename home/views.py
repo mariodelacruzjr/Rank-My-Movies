@@ -1,5 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .utils import tmdb
+from django.contrib.auth.forms import UserCreationForm
 import requests
 import json
 
@@ -15,34 +17,21 @@ def HomeView(request):
     }
     return render(request,'index.html',context)
 
+@login_required
+def DashBoardView(request):
+    return render(request, 'dashboard.html')
 
-"""def MovieView(request):
-    query = request.GET.get('horror')
-    if query:
-        results = tmdb.search_movies(query)['results']
+def register(request):
+    if request.method=='POST':
+        form=UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
     else:
-        results = []
-    context = {'results': results}
-    return render(request, 'movies/search.html', context)"""
+        form=UserCreationForm()
 
-def MovieView(request):
-    #query="scary"
-    #query = request.GET.get('query')
-    #if query:
-        #response = requests.get(f'https://api.themoviedb.org/3/search/movie?api_key=3372059c7957b772cf7c72b570ae110f&query={query}')
-        #results = json.loads(response.content)['results']
-    #else:
-        #results = []
-    #context = {'results': results}
-    response = requests.get(f'https://api.themoviedb.org/3/trending/all/week?api_key=3372059c7957b772cf7c72b570ae110f')
-    trending_all_week_results = json.loads(response.content)['results']
-    context={'trending_all_week_results': trending_all_week_results}
-
-    
+    return render(request, 'register.html', {'form': form})
 
 
-
-    
-    return render(request, 'movies/search.html', context)
 
 

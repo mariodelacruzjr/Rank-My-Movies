@@ -50,6 +50,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+LOGIN_URL='login'
+LOGIN_REDIRECT_URL='/'
 
 ROOT_URLCONF = 'mysite.urls'
 
