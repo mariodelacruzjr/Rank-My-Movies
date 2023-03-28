@@ -53,6 +53,9 @@ MIDDLEWARE = [
 LOGIN_URL='login'
 LOGIN_REDIRECT_URL='/'
 
+LOGOUT_REDIRECT_URL = '/'
+
+
 ROOT_URLCONF = 'mysite.urls'
 
 TEMPLATES = [
