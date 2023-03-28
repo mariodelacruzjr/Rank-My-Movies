@@ -4,11 +4,8 @@
   <a href="{% url 'logout' %}">Logout</a>
 
 {% else %}
-  <p>Please log in to access the dashboard.</p>
-  <a href="{% url 'login' %}">Log in</a>
-{% endif %}
 
-<!doctype html>
+  <!doctype html>
 <html lang="en" class="h-100" data-bs-theme="auto">
   
     {% load static %}
@@ -173,9 +170,10 @@
 
   <main class="px-3">
     <h1>Rank My Movies</h1>
-    <p class="lead">Cover is a one-page template for building simple and beautiful home pages. Download, edit the text, and add your own fullscreen background photo to make it your own.</p>
+    <p class="lead">Welcome to Rank My Movies! Here, you can create a list of your favorite movies and compare them side by side to find out which one you like more.</p>
     <p class="lead">
-      <a href="#" class="btn btn-lg btn-light fw-bold border-white bg-white">Learn more</a>
+      <a href="{% url 'register' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Create an Account</a>
+      <a href="{% url 'login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Log In</a>
     </p>
   </main>
 
@@ -188,3 +186,6 @@
     
   </body>
 </html>
+{% endif %}
+
+
