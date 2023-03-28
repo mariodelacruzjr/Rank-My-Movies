@@ -1,0 +1,15 @@
+{% if trending_all_week_results %}
+    {% for movie in trending_all_week_results|slice:":3" %}
+    <div class="movie">
+      <h2>{{ movie.title }}</h2>
+      <p>{{ movie.release_date }}</p>
+      <p>{{ movie.overview }}</p>
+      <p>{{ movie.vote_average }}</p>
+      
+      <img src="https://image.tmdb.org/t/p/w500/{{ movie.poster_path }}" alt="{{ movie.title }} Poster">
+      <!-- Add other fields as desired -->
+    </div>
+  {% endfor %}
+{% else %}
+  <p>No results found.</p>
+{% endif %}
