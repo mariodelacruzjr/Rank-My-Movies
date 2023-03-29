@@ -12,7 +12,7 @@ from django.http import HttpResponseNotAllowed
 # Create your views here.
 
 def HomeView(request):
-    response = requests.get(f'https://api.themoviedb.org/3/trending/all/week?api_key=3372059c7957b772cf7c72b570ae110f')
+    response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key=3372059c7957b772cf7c72b570ae110f')
     trending_all_week_results = json.loads(response.content)['results']
     
 
@@ -22,7 +22,7 @@ def HomeView(request):
 
 @login_required
 def DashBoardView(request):
-    response = requests.get(f'https://api.themoviedb.org/3/trending/all/week?api_key=3372059c7957b772cf7c72b570ae110f')
+    response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key=3372059c7957b772cf7c72b570ae110f')
     trending_all_week_results = json.loads(response.content)['results']
     context = {
         
@@ -41,27 +41,34 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
+from django.shortcuts import render, redirect
+from .models import Movie
+
 def Favorites(request):
     if request.method == 'POST':
-        # Retrieve movie data from TMDB API based on the movie_id parameter from the POST request
+        # Retrieve movie data from TMDB API
         api_key = '3372059c7957b772cf7c72b570ae110f'
         movie_id = request.POST.get('movie_id')
         endpoint = f'https://api.themoviedb.org/3/movie/{movie_id}'
         response = requests.get(endpoint, params={'api_key': api_key})
-        movie_data = response.json()
+        data = response.json()
 
         # Extract the title and poster path from the movie data
-        movie_title = movie_data['title']
-        movie_poster_path = movie_data['poster_path']
+        movie_title = data['title']
+        movie_poster_path = data['poster_path']
 
         # Create a new Movie instance and save it to the database
         movie = Movie(title=movie_title, poster_path=movie_poster_path)
         movie.save()
 
         # Redirect the user to a success page
-        return render(request, 'favorites.html')
+        return redirect('favorites')
 
-    return HttpResponseNotAllowed(['POST'])
+    # Retrieve all movies from the database
+    movies = Movie.objects.all()
+
+    return render(request, 'favorites.html', {'movies': movies})
+
 
 
 

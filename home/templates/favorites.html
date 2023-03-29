@@ -116,11 +116,16 @@
 
     <p class="lead">Welcome to Rank My Movies! Here, you can create a list of your favorite movies and compare them side by side to find out which one you like more.</p>
     <p class="lead">
-      <a href="{% url 'register' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Create an Account</a>
-      <a href="{% url 'login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Log In</a>
     </p>
   </main>
-  
+  {% block content %}
+  <h1>Your Movies</h1>
+  <ul>
+    {% for movie in movies %}
+      <li>{{ movie.title }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
 
   <footer class="mt-auto text-white-50">
     <p>Cover template for <a href="https://getbootstrap.com/" class="text-white">Bootstrap</a>, by <a href="https://twitter.com/mdo" class="text-white">@mdo</a>.</p>
