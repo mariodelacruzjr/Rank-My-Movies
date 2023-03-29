@@ -1,0 +1,31 @@
+<div class="container">
+  <h2 class="text-center mb-4 display-3">Trending Movies of the Week</h2>
+  <div class="row justify-content-center">
+    {% for movie in trending_all_week_results|slice:":6" %}
+      <div class="col-6 col-md-4 col-lg-2 mb-3">
+        <div class="card h-100">
+          <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" class="card-img-top h-75">
+          <div class="card-body d-flex flex-column justify-content-between">
+            {% if movie.title %}
+            <h5 class="card-title text-center">{{ movie.title }}</h5>
+            {% else %}
+            <h5 class="card-title text-center">{{ movie.name }}</h5>
+            {% endif %}
+            <div class="text-center">
+              <form action="{% url 'favorites' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="movie_id" value="{{ movie.id }}">
+                <button type="submit" class="btn btn-outline-danger align-self-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                    <path d="M9.297.216c-2.16-.938-4.552 1.088-3.54 3.15l.947 1.923.947-1.923c.99-2.062-1.38-4.088-3.54-3.15-2.118.917-2.554 3.793-1.116 5.342l3.048 2.966a.5.5 0 0 0 .756 0l3.048-2.966c1.437-1.549 1.002-4.425-1.116-5.342z"/>
+                    <path d="M8 14.697l-.634-.618C2.799 9.457-.712 5.877.24 4.252 1.192 2.383 4.018-.247 8 .771c3.981-1.018 6.808 1.612 7.76 3.481 1.952 1.626-1.001 5.206-7.126 9.827L8 14.697z"/>
+                  </svg>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
