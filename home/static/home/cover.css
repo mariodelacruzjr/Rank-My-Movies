@@ -7,7 +7,7 @@
 .btn-light,
 .btn-light:hover,
 .btn-light:focus {
-  color: #333 !;
+  color: #333;
   text-shadow: none; /* Prevent inheritance from `body` */
 }
 
@@ -22,7 +22,7 @@ body {
 }
 
 .cover-container {
-  max-width: 42em;
+  max-width: 100em;
 }
 
 
