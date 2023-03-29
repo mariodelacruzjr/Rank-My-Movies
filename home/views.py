@@ -7,18 +7,13 @@ import json
 from .models import Movie
 from django.http import HttpResponse
 from django.http import HttpResponseNotAllowed
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
 
 def HomeView(request):
-    response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key=3372059c7957b772cf7c72b570ae110f')
-    trending_all_week_results = json.loads(response.content)['results']
-    
-
     return render(request,'home.html')
-
-
 
 @login_required
 def DashBoardView(request):
@@ -43,31 +38,26 @@ def register(request):
 
 from django.shortcuts import render, redirect
 from .models import Movie
-
+@login_required
 def Favorites(request):
     if request.method == 'POST':
-        # Retrieve movie data from TMDB API
-        api_key = '3372059c7957b772cf7c72b570ae110f'
         movie_id = request.POST.get('movie_id')
+        api_key = '3372059c7957b772cf7c72b570ae110f'
         endpoint = f'https://api.themoviedb.org/3/movie/{movie_id}'
         response = requests.get(endpoint, params={'api_key': api_key})
         data = response.json()
-
-        # Extract the title and poster path from the movie data
         movie_title = data['title']
+        movie_overview = data['overview']
         movie_poster_path = data['poster_path']
-
-        # Create a new Movie instance and save it to the database
-        movie = Movie(title=movie_title, poster_path=movie_poster_path)
+        movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user=request.user)
         movie.save()
-
-        # Redirect the user to a success page
         return redirect('favorites')
 
-    # Retrieve all movies from the database
-    movies = Movie.objects.all()
-
-    return render(request, 'favorites.html', {'movies': movies})
+    movies = Movie.objects.filter(user=request.user)
+    context = {
+        'movies': movies
+    }
+    return render(request, 'favorites.html', context)
 
 
 
