@@ -122,8 +122,14 @@
   <h1>Your Movies</h1>
   <ul>
     {% for movie in movies %}
-      <li>{{ movie.title }}</li>
-    {% endfor %}
+    <li>{{ movie.title }}
+      <form method="POST" action="{% url 'delete_movie' movie.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="_method" value="DELETE">
+        <button type="submit">Delete</button>
+      </form>
+    </li>
+  {% endfor %}
   </ul>
 {% endblock %}
 

@@ -116,8 +116,8 @@
 
     <p class="lead">Welcome to Rank My Movies! Here, you can create a list of your favorite movies and compare them side by side to find out which one you like more.</p>
     <p class="lead">
-      <a href="{% url 'register' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Create an Account</a>
-      <a href="{% url 'login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Log In</a>
+      <p>Welcome, {{ user.username }}!</p>
+      <a href="{% url 'logout' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Log Out</a>
     </p>
   </main>
   {% include 'trending.html' %}

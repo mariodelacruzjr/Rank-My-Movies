@@ -2,7 +2,8 @@ from django.urls import path
 from . import views
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
-from .views import  register
+from .views import register
+from .views import delete_movie
 
 urlpatterns = [
     path('', views.HomeView, name='home'),
@@ -10,5 +11,8 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', register, name='register'),
-    path('favorites/', views.Favorites, name='favorites')
+    path('favorites/', views.Favorites, name='favorites'),
+    path('movies/<int:movie_id>/delete/', delete_movie, name='delete_movie'),
+
+
 ]

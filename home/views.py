@@ -1,13 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .utils import tmdb
 from django.contrib.auth.forms import UserCreationForm
 import requests
 import json
 from .models import Movie
-from django.http import HttpResponse
-from django.http import HttpResponseNotAllowed
-from django.contrib.auth.decorators import login_required
+
+
 
 
 # Create your views here.
@@ -58,6 +56,20 @@ def Favorites(request):
         'movies': movies
     }
     return render(request, 'favorites.html', context)
+
+
+
+def delete_movie(request, movie_id):
+    movie = get_object_or_404(Movie, pk=movie_id)
+    if request.method == 'POST':
+        movie.delete()
+        return redirect('favorites')
+    return render(request, 'delete_movie.html', {'movie': movie})
+
+
+
+
+
 
 
 
