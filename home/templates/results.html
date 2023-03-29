@@ -1,0 +1,13 @@
+<h1>Search results for "{{ search_query }}"</h1>
+
+{% if movies %}
+    <ul>
+        {% for movie in movies %}
+            <li>
+                <h2>{{ movie.title }}</h2>
+                <img src="{{ movie.poster_path }}" alt="{{ movie.title }} poster">
+                <p>{{ movie.overview }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}

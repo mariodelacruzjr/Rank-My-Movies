@@ -4,6 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 import requests
 import json
 from .models import Movie
+from django.shortcuts import render, redirect
+from .models import Movie
 
 
 
@@ -34,8 +36,7 @@ def register(request):
 
     return render(request, 'register.html', {'form': form})
 
-from django.shortcuts import render, redirect
-from .models import Movie
+
 @login_required
 def Favorites(request):
     if request.method == 'POST':
@@ -65,6 +66,44 @@ def delete_movie(request, movie_id):
         movie.delete()
         return redirect('favorites')
     return render(request, 'delete_movie.html', {'movie': movie})
+
+import requests
+
+def search_results(request):
+    if request.method == 'POST':
+        # Retrieve the search query from the form
+        query = request.POST.get('search_query')
+
+        # Make a request to the TMDB API
+        api_key = '3372059c7957b772cf7c72b570ae110f'
+        url = f'https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={query}'
+        response = requests.get(url)
+        results = response.json()['results']
+
+        # Create a list of movie dictionaries containing the relevant data
+        movies = []
+        for movie in results:
+            if movie['poster_path']:
+                movie_data = {
+                    'title': movie['title'],
+                    'overview': movie['overview'],
+                    'poster_path': 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
+                }
+                movies.append(movie_data)
+
+
+        # Create a context dictionary containing the movie data
+        context = {
+            'movies': movies,
+            'search_query': query
+        }
+
+        # Render the results page template with the context dictionary
+        return render(request, 'results.html', context)
+
+    # If the request method is GET, render the search form template
+    return render(request, 'search.html')
+
 
 
 
