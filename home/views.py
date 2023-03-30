@@ -6,6 +6,8 @@ import json
 from .models import Movie
 from django.shortcuts import render, redirect
 from .models import Movie
+from django.views.decorators.csrf import csrf_exempt
+
 
 
 
@@ -39,19 +41,6 @@ def register(request):
 
 @login_required
 def Favorites(request):
-    if request.method == 'POST':
-        movie_id = request.POST.get('movie_id')
-        api_key = '3372059c7957b772cf7c72b570ae110f'
-        endpoint = f'https://api.themoviedb.org/3/movie/{movie_id}'
-        response = requests.get(endpoint, params={'api_key': api_key})
-        data = response.json()
-        movie_title = data['title']
-        movie_overview = data['overview']
-        movie_poster_path = data['poster_path']
-        movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user=request.user)
-        movie.save()
-        return redirect('favorites')
-
     movies = Movie.objects.filter(user=request.user)
     context = {
         'movies': movies
@@ -67,17 +56,45 @@ def delete_movie(request, movie_id):
         return redirect('favorites')
     return render(request, 'delete_movie.html', {'movie': movie})
 
-import requests
+@login_required
+def save_movie(request):
+    if request.method == 'POST':
+        movie_id = request.POST.get('movie_id')
+        api_key = '3372059c7957b772cf7c72b570ae110f'
+        endpoint = f'https://api.themoviedb.org/3/movie/{movie_id}'
+        response = requests.get(endpoint, params={'api_key': api_key})
+        data = response.json()
+        movie_title = data.get('title')
+        movie_overview = data.get('overview')
+        movie_poster_path = data.get('poster_path')
+        if movie_title and movie_overview and movie_poster_path:
+            print('movie_id:', movie_id)
+            print('movie_title:', movie_title)
+            print('movie_overview:', movie_overview)
+            print('movie_poster_path:', movie_poster_path)
+            movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user_id=request.user.id)
+            movie.save()
+        return redirect('favorites')
+    return render(request, 'save_movie.html')
+
+
 
 def search_results(request):
     if request.method == 'POST':
         # Retrieve the search query from the form
         query = request.POST.get('search_query')
-
+        if not query:
+            # If the search query is not present, render the search form template
+            return render(request, 'search.html')
+            
         # Make a request to the TMDB API
         api_key = '3372059c7957b772cf7c72b570ae110f'
-        url = f'https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={query}'
-        response = requests.get(url)
+        endpoint = f'https://api.themoviedb.org/3/search/movie'
+        params = {
+            'api_key': api_key,
+            'query': query
+        }
+        response = requests.get(endpoint, params=params)
         results = response.json()['results']
 
         # Create a list of movie dictionaries containing the relevant data
@@ -85,6 +102,7 @@ def search_results(request):
         for movie in results:
             if movie['poster_path']:
                 movie_data = {
+                    'id': movie['id'],
                     'title': movie['title'],
                     'overview': movie['overview'],
                     'poster_path': 'https://image.tmdb.org/t/p/w500' + movie['poster_path']
@@ -103,7 +121,6 @@ def search_results(request):
 
     # If the request method is GET, render the search form template
     return render(request, 'search.html')
-
 
 
 
