@@ -1,20 +1,33 @@
 {% extends 'base.html' %}
-  </main>
-  {% block content %}
-  <h1>Your Movies</h1>
-  <ul>
+
+{% block content %}
+  <h1>Favorites</h1>
+  
+  {% if movies %}
+    <ul>
     {% for movie in movies %}
-    <li>{{ movie.title }}
-      <form method="POST" action="{% url 'delete_movie' movie.pk %}">
-        {% csrf_token %}
-        <input type="hidden" name="_method" value="DELETE">
-        <button type="submit">Delete</button>
-      </form>
-    </li>
-  {% endfor %}
-  </ul>
+      <li>
+        <h2>{{ movie.title }}</h2>
+        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
+        <form method="post" action="{% url 'delete_movie' movie.id %}">
+          {% csrf_token %}
+          <button type="submit" onclick="deleteMovie(event, {{ movie.id }})">Delete</button>
+        </form>
+      </li>
+    {% endfor %}
+    </ul>
+  {% else %}
+    <p>You have no favorite movies.</p>
+  {% endif %}
+
+  <script>
+    function deleteMovie(event, movieId) {
+      event.preventDefault();
+      if (confirm('Are you sure you want to delete this movie?')) {
+        fetch(`/delete-movie/${movieId}/`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+          .then(() => location.reload())
+          .catch(error => console.error('Error deleting movie:', error));
+      }
+    }
+  </script>
 {% endblock %}
-
-
-
-

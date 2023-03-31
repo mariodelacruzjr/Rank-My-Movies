@@ -11,9 +11,10 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', register, name='register'),
     path('favorites/', favorites, name='favorites'),
-    path('movies/<int:movie_id>/delete/', delete_movie, name='delete_movie'),
+    path('delete-movie/<int:movie_id>/', delete_movie, name='delete_movie'),
     path('search/', search_results, name='search_results'),
     path('save_movie/', save_movie, name='save_movie'),
+    
 
 
 ]

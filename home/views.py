@@ -1,9 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+
+
 import requests
 import json
 from .models import Movie
+from django.core.paginator import Paginator
+from django.urls import reverse
 
 
 # Create your views here.
@@ -70,18 +74,12 @@ def favorites(request):
 # This view deletes a movie from the user's favorites list
 
 def delete_movie(request, movie_id):
-    # Get the movie object with the specified ID, or return a 404 error if it doesn't exist
     movie = get_object_or_404(Movie, pk=movie_id)
     
-    # Check if the request method is POST
     if request.method == 'POST':
-        # Delete the movie object from the database
         movie.delete()
-        
-        # Redirect the user to the favorites page
-        return redirect('favorites')
+        return HttpResponse('', status=204)
     
-    # If the request method is not POST, render the delete_movie template and pass in the movie object
     return render(request, 'delete_movie.html', {'movie': movie})
 
 
