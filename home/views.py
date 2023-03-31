@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+import random
+from django.contrib import messages
 
 
 import requests
@@ -12,8 +14,31 @@ from django.urls import reverse
 
 # Create your views here.
 
-def rank_movie(request):
-    return render(request, 'rank_movie.html')
+def rank_movies(request):
+    # Get all the movies that belong to the logged-in user and have not been ranked yet
+    movies = Movie.objects.filter(user=request.user, rank__isnull=True)
+
+    # Shuffle the movies to randomize the order
+    shuffled_movies = list(movies)
+    random.shuffle(shuffled_movies)
+
+    # Check if there are at least two movies left to rank
+    if len(shuffled_movies) < 2:
+        # Redirect to the favorites page with a message
+        messages.warning(request, 'You need to save at least 2 movies to rank them.')
+        return redirect('favorites')
+
+    # Get the first two movies from the shuffled list
+    movie1 = shuffled_movies[0]
+    movie2 = shuffled_movies[1]
+
+    # Render the rank page with the two movies
+    context = {
+        'movie1': movie1,
+        'movie2': movie2,
+    }
+    return render(request, 'rank_movies.html', context)
+
 
 # This view displays the home page of the website.
 
@@ -63,12 +88,17 @@ def favorites(request):
     # Get all the movies that belong to the logged-in user
     movies = Movie.objects.filter(user=request.user)
 
+    # Check if all the movies have been ranked
+    if all(movie.rank is not None for movie in movies):
+        # Sort the movies by rank
+        movies = sorted(movies, key=lambda movie: movie.rank)
+
     # Create a context dictionary containing the list of movies
     context = {
-        'movies': movies
+        'movies': movies,
     }
 
-    # Render the favorites page with the list of movies
+    # Render the favorites page with the list
     return render(request, 'favorites.html', context)
 
 
