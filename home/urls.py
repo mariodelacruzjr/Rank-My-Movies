@@ -3,7 +3,6 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
 from .views import search_results, register, delete_movie, save_movie, favorites, dashboard_view, home_view
 
-app_name = 'home'
 
 urlpatterns = [
     path('', home_view, name='home'),

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100" data-bs-theme="auto">
+  <head>
+    {% load static %}
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.111.3">
+    <title>Cover Template · Bootstrap v5.3</title>
+    <link rel="stylesheet" href="{% static 'home/base.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/css/bootstrap.min.css">
+
+
+
+
+    
+
+    
+
+<link href="{% static 'home/base.css' %}" rel="stylesheet">
+
+
+        <title>{% block title %}My Website{% endblock %}</title>
+
+        <!-- Custom styles for this template -->
+    </head>
+    <body class="d-flex flex-column h-100 text-center text-bg-dark">
+
+        <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+          <header>
+            <nav class="navbar bg-body-tertiary">
+              <div class="container-fluid">
+                <a class="navbar-brand">Navbar</a>
+                <form class="d-flex" role="search">
+                  <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                  <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+              </div>
+            </nav>
+          </header>
+      
+          <main class="px-3 mb-5 mt-5 mx-auto">
+            {% block content %}{% endblock %}
+          </main>
+      
+        </div>
+      
+        <footer class="mt-auto text-white-50">
+          <p>Cover template for <a href="https://getbootstrap.com/" class="text-white">Bootstrap</a>, by <a href="https://twitter.com/mdo" class="text-white">@mdo</a>.</p>
+        </footer>
+      
+      </body>
+      
+
+      
+    
+</html>
