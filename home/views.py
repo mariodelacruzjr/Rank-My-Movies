@@ -12,6 +12,9 @@ from django.urls import reverse
 
 # Create your views here.
 
+def rank_movie(request):
+    return render(request, 'rank_movie.html')
+
 # This view displays the home page of the website.
 
 def home_view(request):

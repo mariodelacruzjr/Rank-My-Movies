@@ -1,7 +1,7 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
-from .views import search_results, register, delete_movie, save_movie, favorites, dashboard_view, home_view
+from .views import search_results, register, delete_movie, save_movie, favorites, dashboard_view, home_view, rank_movie
 
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
     path('delete-movie/<int:movie_id>/', delete_movie, name='delete_movie'),
     path('search/', search_results, name='search_results'),
     path('save_movie/', save_movie, name='save_movie'),
+    path('rank_movie/', rank_movie, name='rank_movie'),
     
 
 
