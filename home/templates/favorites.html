@@ -4,18 +4,29 @@
   <h1>Favorites</h1>
   
   {% if movies %}
-    <ul>
-    {% for movie in movies %}
-      <li>
-        <h2>{{ movie.title }}</h2>
-        <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
-        <form method="post" action="{% url 'delete_movie' movie.id %}">
-          {% csrf_token %}
-          <button type="submit" onclick="deleteMovie(event, {{ movie.id }})">Delete</button>
-        </form>
-      </li>
-    {% endfor %}
-    </ul>
+    <table class="table">
+      <thead class="table-dark">
+        <tr>
+          <th>Title</th>
+          <th>Poster</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for movie in movies %}
+        <tr>
+          <td class = "favorite-movie-title">{{ movie.title }}</td>
+          <td><img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}" style="max-width:100px;"></td>
+          <td>
+            <form method="post" action="{% url 'delete_movie' movie.id %}">
+              {% csrf_token %}
+              <button type="submit" onclick="deleteMovie(event, '{{ movie.id }}')" class="btn btn-danger">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   {% else %}
     <p>You have no favorite movies.</p>
   {% endif %}
@@ -31,3 +42,4 @@
     }
   </script>
 {% endblock %}
+
