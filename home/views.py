@@ -14,13 +14,39 @@ from django.urls import reverse
 
 # Create your views here.
 
+
+
+def pair_and_choose(next_level=[], ranked_list=[]):
+    if len(next_level) % 2 == 0:
+        pairs = [[next_level[i], next_level[i+1]] for i in range(0, len(next_level)-1, 2)]
+        for pair in pairs:
+            print("Choose one element from the pair:")
+            print(f"1: {pair[0].title}")
+            print(f"2: {pair[1].title}")
+            user_choice = int(input())
+            if user_choice == 1:
+                ranked_list.append(pair[1])
+                next_level.remove(pair[1])
+            elif user_choice == 2:
+                ranked_list.append(pair[0])
+                next_level.remove(pair[0])
+        return pair_and_choose(next_level, ranked_list)
+    elif len(next_level) == 1:
+        ranked_list.append(next_level[0])
+        next_level.remove(next_level[0])
+        return ranked_list
+    elif len(next_level) % 2 == 1:
+        next_level.append(None)
+        return pair_and_choose(next_level, ranked_list)
+
+
 def rank_movies(request):
     # Get all the movies that belong to the logged-in user and have not been ranked yet
     movies = Movie.objects.filter(user=request.user, rank__isnull=True)
 
     # Shuffle the movies to randomize the order
     shuffled_movies = list(movies)
-    random.shuffle(shuffled_movies)
+    #random.shuffle(shuffled_movies)
 
     # Check if there are at least two movies left to rank
     if len(shuffled_movies) < 2:
@@ -28,16 +54,22 @@ def rank_movies(request):
         messages.warning(request, 'You need to save at least 2 movies to rank them.')
         return redirect('favorites')
 
-    # Get the first two movies from the shuffled list
-    movie1 = shuffled_movies[0]
-    movie2 = shuffled_movies[1]
+    # Rank the movies using the pair_and_choose algorithm
+    ranked_movies = pair_and_choose(next_level=shuffled_movies)
 
-    # Render the rank page with the two movies
+    # Save the ranking to the database
+    for i, movie in enumerate(ranked_movies):
+        movie.rank = i+1
+        movie.save()
+
+    # Render the ranked movies page with the ranked movies
     context = {
-        'movie1': movie1,
-        'movie2': movie2,
+        'ranked_movies': ranked_movies,
     }
-    return render(request, 'rank_movies.html', context)
+    return render(request, 'ranked_movies.html', context)
+
+
+
 
 
 # This view displays the home page of the website.
