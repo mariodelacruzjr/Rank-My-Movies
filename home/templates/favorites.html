@@ -1,9 +1,11 @@
 {% extends 'base.html' %}
 
+
+
 {% block content %}
   <h1>Favorites</h1>
   
-  <a href="{% url 'rank_movies' %}" class="btn btn-primary">Rank Movies</a>
+  
   {% if movies %}
     <table class="table">
       <thead class="table-dark">

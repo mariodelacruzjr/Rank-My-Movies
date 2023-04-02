@@ -22,7 +22,20 @@
                     </svg>
                 </button>
             </form>
+            
             </div>
+            <div class="text-center">
+              <form action="{% url 'poster_design' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="movie_id" value="{{ movie.id }}">
+                <input type="hidden" name="movie_title" value="{% if movie.title %}{{ movie.title }}{% else %}{{ movie.name }}{% endif %}">
+                <button type="submit" class="btn btn-outline-success align-self-center">
+                    Purchase
+                </button>
+              </form>
+              
+          </div>
+          
           </div>
         </div>
       </div>

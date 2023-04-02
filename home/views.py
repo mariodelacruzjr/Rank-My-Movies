@@ -1,72 +1,34 @@
-from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
+from django.http import HttpResponseNotAllowed
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 import random
 from django.contrib import messages
+import base64
+import os
+import requests
+from django.shortcuts import render
+from django.core.files.base import ContentFile
+
 
 
 import requests
 import json
-from .models import Movie
+from .models import MovieImage, Movie
 from django.core.paginator import Paginator
 from django.urls import reverse
 
 
 # Create your views here.
+#To DO LIST
+#get function to stop adding ranked list movies to eachother
+# and find a way to handle the none or -1 for odd value movie lists
+# then display buttons to screen instead of user input
 
 
 
-def pair_and_choose(next_level=[], ranked_list=[]):
-    if len(next_level) % 2 == 0:
-        pairs = [[next_level[i], next_level[i+1]] for i in range(0, len(next_level)-1, 2)]
-        for pair in pairs:
-            print("Choose one element from the pair:")
-            print(f"1: {pair[0].title}")
-            print(f"2: {pair[1].title}")
-            user_choice = int(input())
-            if user_choice == 1:
-                ranked_list.append(pair[1])
-                next_level.remove(pair[1])
-            elif user_choice == 2:
-                ranked_list.append(pair[0])
-                next_level.remove(pair[0])
-        return pair_and_choose(next_level, ranked_list)
-    elif len(next_level) == 1:
-        ranked_list.append(next_level[0])
-        next_level.remove(next_level[0])
-        return ranked_list
-    elif len(next_level) % 2 == 1:
-        next_level.append(None)
-        return pair_and_choose(next_level, ranked_list)
 
-
-def rank_movies(request):
-    # Get all the movies that belong to the logged-in user and have not been ranked yet
-    movies = Movie.objects.filter(user=request.user, rank__isnull=True)
-
-    # Shuffle the movies to randomize the order
-    shuffled_movies = list(movies)
-    #random.shuffle(shuffled_movies)
-
-    # Check if there are at least two movies left to rank
-    if len(shuffled_movies) < 2:
-        # Redirect to the favorites page with a message
-        messages.warning(request, 'You need to save at least 2 movies to rank them.')
-        return redirect('favorites')
-
-    # Rank the movies using the pair_and_choose algorithm
-    ranked_movies = pair_and_choose(next_level=shuffled_movies)
-
-    # Save the ranking to the database
-    for i, movie in enumerate(ranked_movies):
-        movie.rank = i+1
-        movie.save()
-
-    # Render the ranked movies page with the ranked movies
-    context = {
-        'ranked_movies': ranked_movies,
-    }
-    return render(request, 'ranked_movies.html', context)
 
 
 
@@ -115,15 +77,110 @@ def register(request):
 
 # This view displays the list of movies saved as favorites by the logged-in user
 
+
+from django.core.files.base import ContentFile
+import base64
+from .models import Movie, MovieImage
+def poster_results(request, movie_image_id):
+    movie_image = MovieImage.objects.get(id=movie_image_id)
+    return render(request, 'poster_results.html', {'movie_image': movie_image})
+
+def generate_image(request, mov_id):
+    stability_engine_id = "stable-diffusion-v1-5"
+    stability_api_host = os.getenv('API_HOST', 'https://api.stability.ai')
+    stability_api_key = "sk-P2gQhIw1qSMkOcat8vJrUf3bwG6jzFtqlj1zdSwcx7oaPL2R"
+
+    if stability_api_key is None:
+        raise Exception("Missing Stability API key.")
+
+    # Use the movie description as the text prompt
+    tmdb_api_key="3372059c7957b772cf7c72b570ae110f"
+
+    BASE_URL = f'https://api.themoviedb.org/3/'
+
+    endpoint = f'movie/{mov_id}'
+
+    params = {
+        'api_key': tmdb_api_key,
+    }
+
+    tmdb_response = requests.get(BASE_URL + endpoint, params=params)
+
+    tmdb_response_json = json.loads(tmdb_response.text)
+    text_prompt=tmdb_response_json.get("overview")
+    m_title=tmdb_response_json.get("title")
+
+    # Try to retrieve a movie with the given mov_id from the database
+    movie, created = Movie.objects.get_or_create(mov_id=mov_id, defaults={'title': m_title})
+
+    if created:
+        print(f"New movie created: {movie.title} ({movie.mov_id})")
+    else:
+        print(f"Movie already exists: {movie.title} ({movie.mov_id})")
+
+    response = requests.post(
+        f"{stability_api_host}/v1/generation/{stability_engine_id}/text-to-image",
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {stability_api_key}"
+        },
+        json={
+            "text_prompts": [
+                {"text": text_prompt}
+            ],
+            "cfg_scale": 7,
+            "clip_guidance_preset": "FAST_BLUE",
+            "height": 512,
+            "width": 512,
+            "samples": 1,
+            "steps": 30,
+        },
+    )
+
+    if response.status_code != 200:
+        raise Exception("Non-200 response: " + str(response.text))
+
+    data = response.json()
+
+    # Get the base64-encoded image from the response
+    image_data = data["artifacts"][0]["base64"]
+
+    # create a MovieImage instance with the generated image
+    movie_image = MovieImage.objects.create(
+        image=ContentFile(base64.b64decode(image_data), f"{str(mov_id)}.png"),
+        movie=movie,
+    )
+
+    # Save the image data to the movie's image field
+    movie_image.image.save(f"{mov_id}.png", ContentFile(base64.b64decode(image_data)), save=True)
+
+    # Render the poster_design template with the generated image as a context variable
+    return render(request, 'poster_results.html', {'movie_image': movie_image})
+
+
+def poster_design(request):
+    if request.method == 'POST':
+        movie_id = request.POST.get('movie_id')
+        movie_title = request.POST.get('movie_title')
+        api_key = '3372059c7957b772cf7c72b570ae110f'
+        url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US'
+        response = requests.get(url)
+        movie = response.json()
+        return render(request, 'poster_design.html', {'movie': movie, 'movie_title': movie_title})
+    else:
+        return HttpResponseNotAllowed(['POST'])
+
+
 @login_required
 def favorites(request):
     # Get all the movies that belong to the logged-in user
     movies = Movie.objects.filter(user=request.user)
 
     # Check if all the movies have been ranked
-    if all(movie.rank is not None for movie in movies):
+    #if all(movie.rank is not None for movie in movies):
         # Sort the movies by rank
-        movies = sorted(movies, key=lambda movie: movie.rank)
+        #movies = sorted(movies, key=lambda movie: movie.rank)
 
     # Create a context dictionary containing the list of movies
     context = {

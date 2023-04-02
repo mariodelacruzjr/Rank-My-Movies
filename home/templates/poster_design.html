@@ -1,0 +1,15 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="display-1">Poster Design</h1>
+  <h1 class="display-1">{{ movie_title }}</h1>
+  <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="we" class="img-fluid">
+  <p>{{ movie.overview }}</p>
+  <form action="{% url 'generate_image' mov_id=movie.id %}" method="GET">
+    <button type="submit" class="btn btn-outline-success align-self-center">
+        Generate Poster
+    </button>
+</form>
+{% endblock %}

@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Poster Results</h1>
+  <p>Here is your poster:</p>
+  <img src="{{ movie_image.image.url }}" alt="{{ movie_image.title }}">
+{% endblock %}
