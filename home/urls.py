@@ -1,6 +1,8 @@
 from django.urls import path
 from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
+from django.conf.urls.static import static
+from django.conf import settings
 from .views import search_results, register, delete_movie, save_movie, favorites, dashboard_view, home_view, poster_design, generate_image, poster_results
 
 
@@ -22,3 +24,6 @@ urlpatterns = [
 
 
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
