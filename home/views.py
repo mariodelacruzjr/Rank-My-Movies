@@ -1,36 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseNotAllowed
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-import random
-from django.contrib import messages
 import base64
 import os
 import requests
-from django.shortcuts import render
 from django.core.files.base import ContentFile
-
-
-
 import requests
 import json
 from .models import MovieImage, Movie
-from django.core.paginator import Paginator
-from django.urls import reverse
+from django.core.files import File
 
+import openai
+from django.core.files.temp import NamedTemporaryFile
+from urllib.request import urlopen
 
 # Create your views here.
 #To DO LIST
-#get function to stop adding ranked list movies to eachother
-# and find a way to handle the none or -1 for odd value movie lists
-# then display buttons to screen instead of user input
-
-
-
-
-
-
 
 
 
@@ -77,7 +63,7 @@ def register(request):
 
 # This view displays the list of movies saved as favorites by the logged-in user
 
-
+from dotenv import load_dotenv
 from django.core.files.base import ContentFile
 import base64
 from .models import Movie, MovieImage
@@ -85,78 +71,34 @@ def poster_results(request, movie_image_id):
     movie_image = MovieImage.objects.get(id=movie_image_id)
     return render(request, 'poster_results.html', {'movie_image': movie_image})
 
+load_dotenv()
+
 def generate_image(request, mov_id):
-    stability_engine_id = "stable-diffusion-v1-5"
-    stability_api_host = os.getenv('API_HOST', 'https://api.stability.ai')
-    stability_api_key = "sk-P2gQhIw1qSMkOcat8vJrUf3bwG6jzFtqlj1zdSwcx7oaPL2R"
-
-    if stability_api_key is None:
-        raise Exception("Missing Stability API key.")
-
     # Use the movie description as the text prompt
-    tmdb_api_key="3372059c7957b772cf7c72b570ae110f"
-
-    BASE_URL = f'https://api.themoviedb.org/3/'
-
-    endpoint = f'movie/{mov_id}'
-
-    params = {
-        'api_key': tmdb_api_key,
-    }
-
+    tmdb_api_key = "3372059c7957b772cf7c72b570ae110f"
+    BASE_URL = f"https://api.themoviedb.org/3/"
+    endpoint = f"movie/{mov_id}"
+    params = {"api_key": tmdb_api_key}
     tmdb_response = requests.get(BASE_URL + endpoint, params=params)
-
     tmdb_response_json = json.loads(tmdb_response.text)
-    text_prompt=tmdb_response_json.get("overview")
-    m_title=tmdb_response_json.get("title")
-
+    text_prompt = tmdb_response_json.get("overview")
+    m_title = tmdb_response_json.get("title")
+    print(os.environ.get("OPENAI_API_KEY"))
     # Try to retrieve a movie with the given mov_id from the database
-    movie, created = Movie.objects.get_or_create(mov_id=mov_id, defaults={'title': m_title})
-
-    if created:
-        print(f"New movie created: {movie.title} ({movie.mov_id})")
-    else:
-        print(f"Movie already exists: {movie.title} ({movie.mov_id})")
-
-    response = requests.post(
-        f"{stability_api_host}/v1/generation/{stability_engine_id}/text-to-image",
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "Authorization": f"Bearer {stability_api_key}"
-        },
-        json={
-            "text_prompts": [
-                {"text": text_prompt}
-            ],
-            "cfg_scale": 7,
-            "clip_guidance_preset": "FAST_BLUE",
-            "height": 512,
-            "width": 512,
-            "samples": 1,
-            "steps": 30,
-        },
+    openai.api_key=os.environ["OPENAI_API_KEY"]
+    #openai.api_key = "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"
+    res = openai.Image.create(prompt=text_prompt, n=1, size="256x256")
+    image_url = res["data"][0]["url"]
+    img_temp = NamedTemporaryFile()
+    img_temp.write(urlopen(image_url).read())
+    img_temp.flush()
+    my_movie, created = Movie.objects.get_or_create(
+        mov_id=mov_id, defaults={"title": m_title}
     )
+    movie_image = MovieImage(movie=my_movie)
+    movie_image.image.save(f"{my_movie.title}.jpg", img_temp)
 
-    if response.status_code != 200:
-        raise Exception("Non-200 response: " + str(response.text))
-
-    data = response.json()
-
-    # Get the base64-encoded image from the response
-    image_data = data["artifacts"][0]["base64"]
-
-    # create a MovieImage instance with the generated image
-    movie_image = MovieImage.objects.create(
-        image=ContentFile(base64.b64decode(image_data), f"{str(mov_id)}.png"),
-        movie=movie,
-    )
-
-    # Save the image data to the movie's image field
-    movie_image.image.save(f"{mov_id}.png", ContentFile(base64.b64decode(image_data)), save=True)
-
-    # Render the poster_design template with the generated image as a context variable
-    return render(request, 'poster_results.html', {'movie_image': movie_image})
+    return render(request, "poster_results.html", {"movie_image": movie_image})
 
 
 def poster_design(request):

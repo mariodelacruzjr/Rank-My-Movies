@@ -15,10 +15,10 @@ class Movie(models.Model):
         return self.title
     
 class MovieImage(models.Model):
-    movie = models.OneToOneField(Movie, on_delete=models.CASCADE, related_name='image')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='movie_images')
 
     def __str__(self):
-        return self.movie.title + ' Image'
+        return f"{self.movie.title} Image"
 
 
