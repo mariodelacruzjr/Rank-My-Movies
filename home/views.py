@@ -85,8 +85,7 @@ def generate_image(request, mov_id):
     m_title = tmdb_response_json.get("title")
     print(os.environ.get("OPENAI_API_KEY"))
     # Try to retrieve a movie with the given mov_id from the database
-    openai.api_key=os.environ["OPENAI_API_KEY"]
-    #openai.api_key = "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"
+    openai.api_key=os.getenv("OPENAI_API_KEY")
     res = openai.Image.create(prompt=text_prompt, n=1, size="256x256")
     image_url = res["data"][0]["url"]
     img_temp = NamedTemporaryFile()
