@@ -1,11 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  {% if user.is_authenticated %}
-    <p>Welcome, {{ user.username }}!</p>
-    <a href="{% url 'dashboard' %}">Go to dashboard</a>
-    <a href="{% url 'logout' %}">Logout</a>
-  {% else %}
     <main class="px-3">
       <h1>Rank My Movies</h1>
       <p class="lead">Welcome to Rank My Movies! Here, you can create a list of your favorite movies and compare them side by side to find out which one you like more.</p>
@@ -14,5 +9,4 @@
         <a href="{% url 'login' %}" class="btn btn-lg btn-light fw-bold border-white bg-white">Log In</a>
       </p>
     </main>
-  {% endif %}
 {% endblock %}

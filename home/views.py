@@ -2,44 +2,37 @@ from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-import base64
 import os
-import requests
-from django.core.files.base import ContentFile
 import requests
 import json
 from .models import MovieImage, Movie
-from django.core.files import File
-
 import openai
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
-
-# Create your views here.
-#To DO LIST
-
+from dotenv import load_dotenv
+from django.views import View
 
 
-# This view displays the home page of the website.
+class HomeView(View):
+    template_name = 'home.html'
+    dashboard_template_name = 'dashboard.html'
+    
 
-def home_view(request):
-    return render(request, 'home.html')
+    def get(self, request):
+        if request.user.is_authenticated:
+            tmdb_api_key=os.getenv("TMDB_API_KEY")
+            # Make a request to the TMDB API to get the trending movies from the past week
+            response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key={tmdb_api_key}')
+            print(response)
+            # Parse the response and extract the list of trending movies
+            trending_all_week_results = json.loads(response.content)['results']
+            # Create a dictionary containing the trending movies to pass to the template
+            context = {
+                'trending_all_week_results': trending_all_week_results
+            }
+            return render(request, self.dashboard_template_name, context)
+        return render(request, self.template_name)
 
-
-# This view displays the user's dashboard, which includes trending movies from the past week
-
-@login_required
-def dashboard_view(request):
-    # Make a request to the TMDB API to get the trending movies from the past week
-    response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key=3372059c7957b772cf7c72b570ae110f')
-    # Parse the response and extract the list of trending movies
-    trending_all_week_results = json.loads(response.content)['results']
-    # Create a dictionary containing the trending movies to pass to the template
-    context = {
-        'trending_all_week_results': trending_all_week_results
-    }
-    # Render the dashboard template with the trending movies included
-    return render(request, 'dashboard.html', context)
 
 
 # This view handles user registration using the built-in UserCreationForm in Django
@@ -60,22 +53,18 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
-
 # This view displays the list of movies saved as favorites by the logged-in user
 
-from dotenv import load_dotenv
-from django.core.files.base import ContentFile
-import base64
-from .models import Movie, MovieImage
-def poster_results(request, movie_image_id):
+
+def generated_image(request, movie_image_id):
     movie_image = MovieImage.objects.get(id=movie_image_id)
-    return render(request, 'poster_results.html', {'movie_image': movie_image})
+    return render(request, 'generated_image.html', {'movie_image': movie_image})
 
 load_dotenv()
 
 def generate_image(request, mov_id):
     # Use the movie description as the text prompt
-    tmdb_api_key = "3372059c7957b772cf7c72b570ae110f"
+    tmdb_api_key=os.getenv("TMDB_API_KEY")
     BASE_URL = f"https://api.themoviedb.org/3/"
     endpoint = f"movie/{mov_id}"
     params = {"api_key": tmdb_api_key}
@@ -97,15 +86,15 @@ def generate_image(request, mov_id):
     movie_image = MovieImage(movie=my_movie)
     movie_image.image.save(f"{my_movie.title}.jpg", img_temp)
 
-    return render(request, "poster_results.html", {"movie_image": movie_image})
+    return render(request, "generated_image.html", {"movie_image": movie_image})
 
 
 def poster_design(request):
     if request.method == 'POST':
         movie_id = request.POST.get('movie_id')
         movie_title = request.POST.get('movie_title')
-        api_key = '3372059c7957b772cf7c72b570ae110f'
-        url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={api_key}&language=en-US'
+        tmdb_api_key=os.getenv("TMDB_API_KEY")
+        url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={tmdb_api_key}&language=en-US'
         response = requests.get(url)
         movie = response.json()
         return render(request, 'poster_design.html', {'movie': movie, 'movie_title': movie_title})
@@ -118,10 +107,6 @@ def favorites(request):
     # Get all the movies that belong to the logged-in user
     movies = Movie.objects.filter(user=request.user)
 
-    # Check if all the movies have been ranked
-    #if all(movie.rank is not None for movie in movies):
-        # Sort the movies by rank
-        #movies = sorted(movies, key=lambda movie: movie.rank)
 
     # Create a context dictionary containing the list of movies
     context = {
@@ -157,9 +142,9 @@ def save_movie(request):
         movie_id = request.POST.get('movie_id')
         
         # Call The Movie Database API to get movie details
-        api_key = '3372059c7957b772cf7c72b570ae110f'
+        tmdb_api_key=os.getenv("TMDB_API_KEY")
         endpoint = f'https://api.themoviedb.org/3/movie/{movie_id}'
-        response = requests.get(endpoint, params={'api_key': api_key})
+        response = requests.get(endpoint, params={'api_key': tmdb_api_key})
         data = response.json()
         
         # Get the movie title, overview, and poster path from the API response
@@ -178,7 +163,7 @@ def save_movie(request):
         return redirect('favorites')
     
     # If the request method is not POST, render the dashboard template
-    return render(request, 'dashboard')
+    return render(request, 'dashboard.html')
 
 
 
@@ -196,10 +181,10 @@ def search_results(request):
             return render(request, 'search.html')
             
         # Set up API parameters and make request to The Movie Database API
-        api_key = '3372059c7957b772cf7c72b570ae110f'
+        tmdb_api_key=os.getenv("TMDB_API_KEY")
         endpoint = f'https://api.themoviedb.org/3/search/movie'
         params = {
-            'api_key': api_key,
+            'api_key': tmdb_api_key,
             'query': query
         }
         response = requests.get(endpoint, params=params)
