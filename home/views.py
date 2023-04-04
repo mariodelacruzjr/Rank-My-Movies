@@ -9,7 +9,6 @@ from .models import MovieImage, Movie
 import openai
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
-from dotenv import load_dotenv
 from django.views import View
 
 
@@ -56,11 +55,11 @@ def register(request):
 # This view displays the list of movies saved as favorites by the logged-in user
 
 
-def generated_image(request, movie_image_id):
-    movie_image = MovieImage.objects.get(id=movie_image_id)
-    return render(request, 'generated_image.html', {'movie_image': movie_image})
+#def generated_image(request, movie_image_id):
+    #movie_image = MovieImage.objects.get(id=movie_image_id)
+    #return render(request, 'generated_image.html', {'movie_image': movie_image})
 
-load_dotenv()
+
 
 def generate_image(request, mov_id):
     # Use the movie description as the text prompt

@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import search_results, register, delete_movie, save_movie, favorites, HomeView, poster_design, generate_image, generated_image
+from .views import search_results, register, delete_movie, save_movie, favorites, HomeView, poster_design, generate_image
 
 
 urlpatterns = [
@@ -15,7 +15,6 @@ urlpatterns = [
     path('delete-movie/<int:movie_id>/', delete_movie, name='delete_movie'),
     path('search/', search_results, name='search_results'),
     path('save_movie/', save_movie, name='save_movie'),
-    path('generated_image/<int:movie_image_id>/', generated_image, name='generated_image'),
     path('poster_design/', poster_design, name='poster_design'),
 
     path('generate_image/<int:mov_id>/', generate_image, name='generate_image')
