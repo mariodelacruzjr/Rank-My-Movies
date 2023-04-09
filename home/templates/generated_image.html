@@ -4,4 +4,12 @@
   <h1>Poster Results</h1>
   <p>Here is your poster:</p>
   <img src="{{ movie_image.image.url }}" alt="{{ movie_image.title }}">
+  <form action="{% url 'add_to_cart' image_id=movie_image.id %}" method="POST">
+    {% csrf_token %}
+    <input type="hidden" name="movie_id" value="{{ movie.id }}">
+    <input type="hidden" name="movie_title" value="{% if movie.title %}{{ movie.title }}{% else %}{{ movie.name }}{% endif %}">
+    <button type="submit" class="btn btn-outline-primary align-self-center">
+      Add to Cart
+    </button>
+  </form>
 {% endblock %}

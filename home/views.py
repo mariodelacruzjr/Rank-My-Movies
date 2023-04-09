@@ -12,6 +12,46 @@ from urllib.request import urlopen
 from django.views import View
 
 
+def add_to_cart(request, image_id):
+    image = get_object_or_404(MovieImage, id=image_id)
+    cart = request.session.get('cart', {})
+    cart_item = cart.get(str(image_id))
+
+    if cart_item:
+        cart_item['quantity'] += 1
+        cart_item['price'] = float(cart_item['price']) + float(10)
+    else:
+        cart[str(image_id)] = {
+            'id': str(image.id),
+            'title': image.movie.title,
+            'image_url': image.image.url,
+            'quantity': 1,
+            'price': float(10)
+        }
+
+    request.session['cart'] = cart
+    print(f"cart is {cart}")
+    print(f"cart items are {cart.items}")
+    return redirect('cart_view')
+
+def cart_view(request):
+    cart = request.session.get('cart', {})
+    cart_items = []
+    total = 0
+    for item in cart.values():
+        total += float(item['price'])
+        item['image_url'] = item.get('image_url', '')
+        cart_items.append(item)
+    print("Cart Items:", cart_items)
+    print("Total:", total)
+    context = {
+        'cart_items': cart_items,
+        'total': total
+    }
+    return render(request, 'cart.html', context)
+
+
+
 class HomeView(View):
     template_name = 'home.html'
     dashboard_template_name = 'dashboard.html'
@@ -212,6 +252,7 @@ def search_results(request):
 
     # If the request method is not POST, render the dashboard page
     return render(request, 'dashboard.html')
+
 
 
 

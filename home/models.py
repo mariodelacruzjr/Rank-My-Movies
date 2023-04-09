@@ -15,8 +15,11 @@ class Movie(models.Model):
         return self.title
     
 class MovieImage(models.Model):
+    
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='movie_images')
+    price = models.DecimalField(max_digits=6, decimal_places=2,default=0)
+
 
     def __str__(self):
         return f"{self.movie.title} Image"

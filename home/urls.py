@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from django.conf import settings
 from .views import search_results, register, delete_movie, save_movie, favorites, HomeView, poster_design, generate_image
+from .views import add_to_cart, cart_view
 
 
 urlpatterns = [
@@ -17,7 +18,10 @@ urlpatterns = [
     path('save_movie/', save_movie, name='save_movie'),
     path('poster_design/', poster_design, name='poster_design'),
 
-    path('generate_image/<int:mov_id>/', generate_image, name='generate_image')
+    path('generate_image/<int:mov_id>/', generate_image, name='generate_image'),
+
+    path('add-to-cart/<int:image_id>/', add_to_cart, name='add_to_cart'),
+    path('cart/', cart_view, name='cart_view'),
     
 
 
