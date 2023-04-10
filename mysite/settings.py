@@ -137,3 +137,8 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+TMDB_API_KEY=os.getenv("TMDB_API_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_API_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLISHABLE_API_KEY")
+OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")

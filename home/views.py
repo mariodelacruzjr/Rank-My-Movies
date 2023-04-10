@@ -1,42 +1,23 @@
+
+import requests
+import json
+import openai
+import stripe
+from .models import MovieImage, Movie
+from django.core.files.temp import NamedTemporaryFile
+from urllib.request import urlopen
+from django.views import View
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
-import os
-import requests
-import json
-from .models import MovieImage, Movie
-import openai
-from django.core.files.temp import NamedTemporaryFile
-from urllib.request import urlopen
-from django.views import View
-import stripe
-from django.urls import reverse
 
 
-#STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_API_KEY")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_API_KEY")
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLISHABLE_API_KEY")
-
-
-stripe.api_key = STRIPE_SECRET_KEY
-
-"""
-views.py
-Stripe Sample.
-Python 3.6 or newer required.
-"""
-import os
-from django.shortcuts import render, redirect
-from django.conf import settings
-
-import stripe
-# This is your test secret API key.
-stripe.api_key = STRIPE_SECRET_KEY
 
 
 def checkout(request):
-    stripe.api_key = STRIPE_SECRET_KEY
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     
     cart = request.session.get('cart', {})
     cart_items = []
@@ -45,7 +26,6 @@ def checkout(request):
         
         total += float(item['price'])
         image_url = request.build_absolute_uri(item['image_url'])
-        print(f"MEOOOOOOEE{image_url}")
         cart_items.append({
             'price_data': {
                 'currency': 'usd',
@@ -58,9 +38,7 @@ def checkout(request):
             },
             'quantity': 1,
         })
-        print(1111111111)
-        print(STRIPE_SECRET_KEY)
-        print(STRIPE_PUBLIC_KEY)
+       
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -69,11 +47,11 @@ def checkout(request):
         success_url='http://localhost:8000/success/',
         cancel_url='http://localhost:8000/cancel/',
     )
-    print(f"000000000000000000000000000000000000000000000000000 {session}")
+    
 
     return render(request, 'checkout.html', {
         'session_id': session.id,
-        'stripe_public_key': STRIPE_PUBLIC_KEY
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY
     })
 
 
@@ -84,30 +62,6 @@ def success(request):
 def cancel(request):
     return render(request, 'cancel.html')
 
-
-
-
-import stripe
-from django.conf import settings
-from django.shortcuts import render, redirect
-
-stripe.api_key = STRIPE_SECRET_KEY
-
-
-
-
-
-def payment_confirmation_view(request):
-    payment_intent_id = request.POST['payment_intent_id']
-
-    payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-
-    if payment_intent.status == 'succeeded':
-        # Clear the user's cart
-        request.session['cart'] = {}
-        return redirect('success_page')
-    else:
-        return redirect('cancel_page')
 
 
 def remove_from_cart(request, image_id):
@@ -168,9 +122,8 @@ class HomeView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
-            tmdb_api_key=os.getenv("TMDB_API_KEY")
             # Make a request to the TMDB API to get the trending movies from the past week
-            response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key={tmdb_api_key}')
+            response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key={settings.TMDB_API_KEY}')
             print(response)
             # Parse the response and extract the list of trending movies
             trending_all_week_results = json.loads(response.content)['results']
@@ -183,7 +136,7 @@ class HomeView(View):
 
 
 
-# This view handles user registration using the built-in UserCreationForm in Django
+
 
 def register(request):
     if request.method == 'POST':
@@ -201,28 +154,20 @@ def register(request):
     return render(request, 'register.html', {'form': form})
 
 
-# This view displays the list of movies saved as favorites by the logged-in user
-
-
-#def generated_image(request, movie_image_id):
-    #movie_image = MovieImage.objects.get(id=movie_image_id)
-    #return render(request, 'generated_image.html', {'movie_image': movie_image})
 
 
 
 def generate_image(request, mov_id):
     # Use the movie description as the text prompt
-    tmdb_api_key=os.getenv("TMDB_API_KEY")
     BASE_URL = f"https://api.themoviedb.org/3/"
     endpoint = f"movie/{mov_id}"
-    params = {"api_key": tmdb_api_key}
+    params = {"api_key": settings.TMDB_API_KEY}
     tmdb_response = requests.get(BASE_URL + endpoint, params=params)
     tmdb_response_json = json.loads(tmdb_response.text)
     text_prompt = tmdb_response_json.get("overview")
     m_title = tmdb_response_json.get("title")
-    print(os.environ.get("OPENAI_API_KEY"))
     # Try to retrieve a movie with the given mov_id from the database
-    openai.api_key=os.getenv("OPENAI_API_KEY")
+    openai.api_key=settings.OPENAI_API_KEY
     res = openai.Image.create(prompt=text_prompt, n=1, size="256x256")
     image_url = res["data"][0]["url"]
     img_temp = NamedTemporaryFile()
@@ -241,8 +186,7 @@ def poster_design(request):
     if request.method == 'POST':
         movie_id = request.POST.get('movie_id')
         movie_title = request.POST.get('movie_title')
-        tmdb_api_key=os.getenv("TMDB_API_KEY")
-        url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={tmdb_api_key}&language=en-US'
+        url = f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={settings.TMDB_API_KEY}&language=en-US'
         response = requests.get(url)
         movie = response.json()
         return render(request, 'poster_design.html', {'movie': movie, 'movie_title': movie_title})
@@ -264,9 +208,6 @@ def favorites(request):
     # Render the favorites page with the list
     return render(request, 'favorites.html', context)
 
-
-
-
 # This view deletes a movie from the user's favorites list
 
 
@@ -279,8 +220,6 @@ def delete_movie(request, movie_id):
     
     return render(request, 'delete_movie.html', {'movie': movie})
 
-
-
 # This view saves a new movie to the user's favorites list
 
 @login_required
@@ -291,9 +230,8 @@ def save_movie(request):
         movie_id = request.POST.get('movie_id')
         
         # Call The Movie Database API to get movie details
-        tmdb_api_key=os.getenv("TMDB_API_KEY")
         endpoint = f'https://api.themoviedb.org/3/movie/{movie_id}'
-        response = requests.get(endpoint, params={'api_key': tmdb_api_key})
+        response = requests.get(endpoint, params={'api_key': settings.TMDB_API_KEY})
         data = response.json()
         
         # Get the movie title, overview, and poster path from the API response
@@ -314,8 +252,6 @@ def save_movie(request):
     # If the request method is not POST, render the dashboard template
     return render(request, 'dashboard.html')
 
-
-
 # This view allows a user to search for movies using The Movie Database API
 
 @login_required
@@ -330,10 +266,9 @@ def search_results(request):
             return render(request, 'search.html')
             
         # Set up API parameters and make request to The Movie Database API
-        tmdb_api_key=os.getenv("TMDB_API_KEY")
         endpoint = f'https://api.themoviedb.org/3/search/movie'
         params = {
-            'api_key': tmdb_api_key,
+            'api_key': settings.TMDB_API_KEY,
             'query': query
         }
         response = requests.get(endpoint, params=params)
@@ -362,16 +297,6 @@ def search_results(request):
 
     # If the request method is not POST, render the dashboard page
     return render(request, 'dashboard.html')
-
-
-
-
-
-
-
-
-
-
 
 
 
