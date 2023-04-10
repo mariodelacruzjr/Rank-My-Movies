@@ -11,6 +11,16 @@ from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
 from django.views import View
 
+def remove_from_cart(request, image_id):
+    cart = request.session.get('cart', {})
+    cart_item = cart.get(str(image_id))
+
+    if cart_item:
+        del cart[str(image_id)]
+        request.session['cart'] = cart
+
+    return redirect('cart_view')
+
 
 def add_to_cart(request, image_id):
     image = get_object_or_404(MovieImage, id=image_id)
@@ -159,6 +169,7 @@ def favorites(request):
 
 
 # This view deletes a movie from the user's favorites list
+
 
 def delete_movie(request, movie_id):
     movie = get_object_or_404(Movie, pk=movie_id)
