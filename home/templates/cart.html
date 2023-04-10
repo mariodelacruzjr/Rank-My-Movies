@@ -24,7 +24,9 @@
           <td>
             <form action="{% url 'remove_from_cart' item.id %}" method="POST">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                <button type="submit" class="btn btn-danger btn-sm">
+                  <i class="bi bi-x"></i>
+                </button>
             </form>
         </td>
         </tr>

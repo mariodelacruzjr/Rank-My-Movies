@@ -259,7 +259,7 @@ def search_results(request):
         }
 
         # Render the results page with the list of movies and the search query
-        return render(request, 'results.html', context)
+        return render(request, 'search_results.html', context)
 
     # If the request method is not POST, render the dashboard page
     return render(request, 'dashboard.html')

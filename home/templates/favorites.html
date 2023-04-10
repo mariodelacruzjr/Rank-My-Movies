@@ -23,7 +23,9 @@
           <td>
             <form method="post" action="{% url 'delete_movie' movie.id %}">
               {% csrf_token %}
-              <button type="submit" onclick="deleteMovie(event, '{{ movie.id }}')" class="btn btn-danger">Delete</button>
+              <button type="submit" onclick="deleteMovie(event, '{{ movie.id }}')" class="btn btn-danger">
+                <i class="bi bi-x"></i>
+              </button>
             </form>
           </td>
         </tr>
@@ -38,11 +40,9 @@
   <script>
     function deleteMovie(event, movieId) {
       event.preventDefault();
-      if (confirm('Are you sure you want to delete this movie?')) {
-        fetch(`/delete-movie/${movieId}/`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
+      fetch(`/delete-movie/${movieId}/`, { method: 'POST', headers: { 'X-CSRFToken': '{{ csrf_token }}' } })
           .then(() => location.reload())
           .catch(error => console.error('Error deleting movie:', error));
-      }
     }
   </script>
 {% endblock %}
