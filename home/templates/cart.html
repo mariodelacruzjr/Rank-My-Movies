@@ -1,46 +1,48 @@
 {% extends "base.html" %}
+{% load mathfilters %}
+
 
 {% block content %}
+
     <div class="cart-display">
-    <h1>Cart</h1>
-    <table class="table">
-    <thead>
-      <tr>
-        <th>Image</th>
-        <th>Title</th>
-        <th>Price</th>
-        <th>Quantity</th>
-        <th>Subtotal</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for item in cart_items %}
-        <tr>
-          <td><img src="{{ item.image_url }}" alt="{{ item.title }}"></td>
-          <td>{{ item.title }}</td>
-          <td>${{ item.price }}</td>
-          <td>{{ item.quantity }}</td>
-          <td>${{ item.price|floatformat:2 }}</td>
-          <td>
-            <form action="{% url 'remove_from_cart' item.id %}" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">
-                  <i class="bi bi-x"></i>
-                </button>
-            </form>
-        </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="4" class="text-right"><strong>Total:</strong></td>
-        <td><strong>${{ total|floatformat:2 }}</strong></td>
-      </tr>
-    </tfoot>
-    </table>
+        <h1>Cart</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}
+                    <tr>
+                        <td><img src="{{ item.image_url }}" alt="{{ item.title }}"></td>
+                        <td>{{ item.title }}</td>
+                        <td>${{ item.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.price|floatformat:2 }}</td>
+                        <td>
+                            <form action="{% url 'remove_from_cart' item.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" class="text-right"><strong>Total:</strong></td>
+                    <td><strong>${{ total|floatformat:2 }}</strong></td>
+                    <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+                </tr>
+            </tfoot>
+        </table>
+    
     </div>
 {% endblock %}
-
-
-

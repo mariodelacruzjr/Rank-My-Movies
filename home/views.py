@@ -10,6 +10,105 @@ import openai
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
 from django.views import View
+import stripe
+from django.urls import reverse
+
+
+#STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_API_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_API_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLISHABLE_API_KEY")
+
+
+stripe.api_key = STRIPE_SECRET_KEY
+
+"""
+views.py
+Stripe Sample.
+Python 3.6 or newer required.
+"""
+import os
+from django.shortcuts import render, redirect
+from django.conf import settings
+
+import stripe
+# This is your test secret API key.
+stripe.api_key = STRIPE_SECRET_KEY
+
+
+def checkout(request):
+    stripe.api_key = STRIPE_SECRET_KEY
+    
+    cart = request.session.get('cart', {})
+    cart_items = []
+    total = 0
+    for item in cart.values():
+        
+        total += float(item['price'])
+        image_url = request.build_absolute_uri(item['image_url'])
+        print(f"MEOOOOOOEE{image_url}")
+        cart_items.append({
+            'price_data': {
+                'currency': 'usd',
+                'unit_amount': int(item['price']*100),
+                'product_data': {
+                    'name': item['title'],
+                    'images': [image_url],
+                    
+                },
+            },
+            'quantity': 1,
+        })
+        print(1111111111)
+        print(STRIPE_SECRET_KEY)
+        print(STRIPE_PUBLIC_KEY)
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=cart_items,
+        mode='payment',
+        success_url='http://localhost:8000/success/',
+        cancel_url='http://localhost:8000/cancel/',
+    )
+    print(f"000000000000000000000000000000000000000000000000000 {session}")
+
+    return render(request, 'checkout.html', {
+        'session_id': session.id,
+        'stripe_public_key': STRIPE_PUBLIC_KEY
+    })
+
+
+
+def success(request):
+    return render(request, 'success.html')
+
+def cancel(request):
+    return render(request, 'cancel.html')
+
+
+
+
+import stripe
+from django.conf import settings
+from django.shortcuts import render, redirect
+
+stripe.api_key = STRIPE_SECRET_KEY
+
+
+
+
+
+def payment_confirmation_view(request):
+    payment_intent_id = request.POST['payment_intent_id']
+
+    payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+    if payment_intent.status == 'succeeded':
+        # Clear the user's cart
+        request.session['cart'] = {}
+        return redirect('success_page')
+    else:
+        return redirect('cancel_page')
+
 
 def remove_from_cart(request, image_id):
     cart = request.session.get('cart', {})
