@@ -22,7 +22,6 @@ urlpatterns = [
     path('checkout/', checkout, name='checkout'),
     path('success/', success, name='success'),
     path('cancel/', cancel, name='cancel'),
-    #path('get_token_count/', get_token_count, name='get_token_count'),
 
 
 ]

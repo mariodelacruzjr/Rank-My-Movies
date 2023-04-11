@@ -1,7 +1,4 @@
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from .models import Token
-
 
 def token_count(request):
     if not request.user.is_authenticated:

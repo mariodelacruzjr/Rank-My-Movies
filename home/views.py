@@ -22,10 +22,7 @@ def create_token(sender, user, request, **kwargs):
         # If the user does not have a Token object, create one with 0 tokens
         token = Token.objects.create(user=user, token_count=0)
 
-#@login_required
-#def get_token_count(request):
-    #token_count = Token.objects.get(user=request.user).token_count
-    #return {'token_count': token_count}
+
 def checkout(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     
