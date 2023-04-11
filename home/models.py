@@ -24,4 +24,10 @@ class MovieImage(models.Model):
     def __str__(self):
         return f"{self.movie.title} Image"
 
+class Token(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    token_count = models.PositiveIntegerField(default=0)
+    last_updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"Token for {self.user.username}"

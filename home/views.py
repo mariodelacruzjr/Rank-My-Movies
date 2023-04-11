@@ -3,7 +3,8 @@ import requests
 import json
 import openai
 import stripe
-from .models import MovieImage, Movie
+from django.contrib.auth import get_user_model
+from .models import MovieImage, Movie, Token
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
 from django.views import View
@@ -12,10 +13,19 @@ from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.dispatch import receiver
+from django.contrib.auth.signals import user_logged_in
+@receiver(user_logged_in)
+def create_token(sender, user, request, **kwargs):
+    # Check if the user already has a Token object
+    if not Token.objects.filter(user=user).exists():
+        # If the user does not have a Token object, create one with 0 tokens
+        token = Token.objects.create(user=user, token_count=0)
 
-
-
-
+#@login_required
+#def get_token_count(request):
+    #token_count = Token.objects.get(user=request.user).token_count
+    #return {'token_count': token_count}
 def checkout(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
     

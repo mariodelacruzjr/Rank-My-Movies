@@ -4,7 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from django.conf import settings
 from .views import search_results, register, delete_movie, save_movie, favorites, HomeView, poster_design, generate_image, add_to_cart, cart_view, remove_from_cart, checkout, cancel, success
-
+#from .views import get_token_count
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
@@ -22,6 +22,8 @@ urlpatterns = [
     path('checkout/', checkout, name='checkout'),
     path('success/', success, name='success'),
     path('cancel/', cancel, name='cancel'),
+    #path('get_token_count/', get_token_count, name='get_token_count'),
+
 
 ]
 
