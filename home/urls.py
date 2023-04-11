@@ -3,9 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import search_results, register, delete_movie, save_movie, favorites, HomeView, poster_design, generate_image
-from .views import add_to_cart, cart_view, remove_from_cart
-from .views import checkout, cancel, success
+from .views import search_results, register, delete_movie, save_movie, favorites, HomeView, poster_design, generate_image, add_to_cart, cart_view, remove_from_cart, checkout, cancel, success
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
@@ -17,18 +15,13 @@ urlpatterns = [
     path('search/', search_results, name='search_results'),
     path('save_movie/', save_movie, name='save_movie'),
     path('poster_design/', poster_design, name='poster_design'),
-
     path('generate_image/<int:mov_id>/', generate_image, name='generate_image'),
-
     path('add-to-cart/<int:image_id>/', add_to_cart, name='add_to_cart'),
     path('cart/', cart_view, name='cart_view'),
     path('cart/remove/<int:image_id>/',remove_from_cart, name='remove_from_cart'),
     path('checkout/', checkout, name='checkout'),
     path('success/', success, name='success'),
     path('cancel/', cancel, name='cancel'),
-
-    
-
 
 ]
 

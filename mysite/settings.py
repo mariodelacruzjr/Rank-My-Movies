@@ -13,7 +13,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 
-
+TMDB_API_KEY=os.getenv("TMDB_API_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_API_KEY")
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLISHABLE_API_KEY")
+OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
+DJANGO_SECRET_KEY=os.getenv("DJANGO_SECRET_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7@8%8pz+cijz*ul(^qbm8l7fu$-wmjxwkzws_=#50^1mp+z_yk'
+SECRET_KEY = DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -138,7 +142,4 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-TMDB_API_KEY=os.getenv("TMDB_API_KEY")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_API_KEY")
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLISHABLE_API_KEY")
-OPENAI_API_KEY=os.getenv("OPENAI_API_KEY")
+
