@@ -168,6 +168,9 @@ class HomeView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
+            #user_favorites = Movie.objects.filter(user=request.user)
+            user_favorites = Movie.objects.filter(user=request.user).values_list('title', flat=True)
+            print(user_favorites)
             # Make a request to the TMDB API to get the trending movies from the past week
             response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key={settings.TMDB_API_KEY}')
             print(response)
@@ -175,7 +178,8 @@ class HomeView(View):
             trending_all_week_results = json.loads(response.content)['results']
             # Create a dictionary containing the trending movies to pass to the template
             context = {
-                'trending_all_week_results': trending_all_week_results
+                'trending_all_week_results': trending_all_week_results,
+                'user_favorites' : user_favorites
             }
             return render(request, self.dashboard_template_name, context)
         return render(request, self.template_name)

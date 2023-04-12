@@ -16,7 +16,11 @@
                 {% csrf_token %}
                 <input type="hidden" name="movie_id" value="{{ movie.id }}">
                 <button type="submit" class="btn btn-outline-danger align-self-center">
-                  <i class="bi bi-heart"></i>
+                    {% if movie in user_favorites %}
+                        <i class="bi bi-heart-fill"></i>
+                    {% else %}
+                        <i class="bi bi-heart"></i>
+                    {% endif %}
                 </button>
             </form>
 
