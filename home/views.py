@@ -170,10 +170,11 @@ class HomeView(View):
         if request.user.is_authenticated:
             #user_favorites = Movie.objects.filter(user=request.user)
             user_favorites = Movie.objects.filter(user=request.user).values_list('title', flat=True)
-            print(user_favorites)
+            user_favorites1 = Movie.objects.filter(user=request.user).values_list('mov_id', flat=True)
+            print(user_favorites1)
             # Make a request to the TMDB API to get the trending movies from the past week
             response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key={settings.TMDB_API_KEY}')
-            print(response)
+            #print(response)
             # Parse the response and extract the list of trending movies
             trending_all_week_results = json.loads(response.content)['results']
             # Create a dictionary containing the trending movies to pass to the template
@@ -283,11 +284,12 @@ def save_movie(request):
         movie_overview = data.get('overview')
         movie_poster_path = data.get('poster_path')
         
+        
         # Check if all required movie details are available
         if movie_title and movie_overview and movie_poster_path:
 
             # Create a new Movie object and save it to the database
-            movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user_id=request.user.id)
+            movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user_id=request.user.id, mov_id=movie_id)
             movie.save()
         
         # Redirect the user to the favorites page
