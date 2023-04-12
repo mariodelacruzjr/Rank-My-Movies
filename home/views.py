@@ -15,13 +15,22 @@ from django.contrib.auth.forms import UserCreationForm
 from django.dispatch import receiver
 from django.contrib.auth.signals import user_logged_in
 
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.conf import settings
+from django.core.files.temp import NamedTemporaryFile
+from urllib.request import urlopen
+from .models import Movie, MovieImage, Token
+import openai
+import requests
+import json
+
 @receiver(user_logged_in)
 def create_token(sender, user, request, **kwargs):
     # Check if the user already has a Token object
     if not Token.objects.filter(user=user).exists():
         # If the user does not have a Token object, create one with 0 tokens
         token = Token.objects.create(user=user, token_count=0)
-
 
 def checkout(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -61,15 +70,11 @@ def checkout(request):
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY
     })
 
-
-
 def success(request):
     return render(request, 'success.html')
 
 def cancel(request):
     return render(request, 'cancel.html')
-
-
 
 def remove_from_cart(request, image_id):
     cart = request.session.get('cart', {})
@@ -80,7 +85,6 @@ def remove_from_cart(request, image_id):
         request.session['cart'] = cart
 
     return redirect('cart_view')
-
 
 def add_to_cart(request, image_id):
     image = get_object_or_404(MovieImage, id=image_id)
@@ -108,8 +112,6 @@ def add_to_cart(request, image_id):
     print(f"cart items are {cart.items}")
     return redirect('cart_view')
 
-
-
 def cart_view(request):
     cart = request.session.get('cart', {})
     cart_items = []
@@ -125,8 +127,6 @@ def cart_view(request):
         'total': total
     }
     return render(request, 'cart.html', context)
-
-
 
 class HomeView(View):
     template_name = 'home.html'
@@ -147,10 +147,6 @@ class HomeView(View):
             return render(request, self.dashboard_template_name, context)
         return render(request, self.template_name)
 
-
-
-
-
 def register(request):
     if request.method == 'POST':
         # If the form has been submitted, create a UserCreationForm with the submitted data
@@ -166,11 +162,11 @@ def register(request):
     # Render the registration page with the UserCreationForm
     return render(request, 'register.html', {'form': form})
 
-
-
-
-
 def generate_image(request, mov_id):
+    user_tokens = Token.objects.get(user=request.user).token_count
+    if user_tokens < 20:
+        messages.error(request, "You need at least 20 tokens to generate an image.")
+        return redirect('home')
     # Use the movie description as the text prompt
     BASE_URL = f"https://api.themoviedb.org/3/"
     endpoint = f"movie/{mov_id}"
@@ -192,8 +188,12 @@ def generate_image(request, mov_id):
     movie_image = MovieImage(movie=my_movie)
     movie_image.image.save(f"{my_movie.title}.jpg", img_temp)
 
+    user_tokens -= 20
+    token_obj = Token.objects.get(user=request.user)
+    token_obj.token_count = user_tokens
+    token_obj.save()
+    messages.success(request, "Image generated successfully. 20 tokens deducted from your account.")
     return render(request, "generated_image.html", {"movie_image": movie_image})
-
 
 def poster_design(request):
     if request.method == 'POST':
@@ -205,7 +205,6 @@ def poster_design(request):
         return render(request, 'poster_design.html', {'movie': movie, 'movie_title': movie_title})
     else:
         return HttpResponseNotAllowed(['POST'])
-
 
 @login_required
 def favorites(request):
@@ -221,9 +220,6 @@ def favorites(request):
     # Render the favorites page with the list
     return render(request, 'favorites.html', context)
 
-# This view deletes a movie from the user's favorites list
-
-
 def delete_movie(request, movie_id):
     movie = get_object_or_404(Movie, pk=movie_id)
     
@@ -232,8 +228,6 @@ def delete_movie(request, movie_id):
         return HttpResponse('', status=204)
     
     return render(request, 'delete_movie.html', {'movie': movie})
-
-# This view saves a new movie to the user's favorites list
 
 @login_required
 def save_movie(request):
@@ -264,8 +258,6 @@ def save_movie(request):
     
     # If the request method is not POST, render the dashboard template
     return render(request, 'dashboard.html')
-
-# This view allows a user to search for movies using The Movie Database API
 
 @login_required
 def search_results(request):
