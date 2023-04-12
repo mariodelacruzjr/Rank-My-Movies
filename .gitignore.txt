@@ -1,0 +1,6 @@
+# Ignore database and migration files
+db.sqlite3
+migrations
+
+# Ignore media files
+media
