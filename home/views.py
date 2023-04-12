@@ -14,16 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.dispatch import receiver
 from django.contrib.auth.signals import user_logged_in
-
 from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.conf import settings
-from django.core.files.temp import NamedTemporaryFile
-from urllib.request import urlopen
-from .models import Movie, MovieImage, Token
-import openai
-import requests
-import json
 
 @receiver(user_logged_in)
 def create_token(sender, user, request, **kwargs):
