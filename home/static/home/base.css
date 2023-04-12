@@ -24,3 +24,12 @@ body {
     max-height: 100px;
 }
 
+.gold-coins{
+    max-width: 350px;
+}
+
+
+.coin-card{
+    width: 18rem;
+    margin: auto;
+}
