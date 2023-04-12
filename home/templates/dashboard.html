@@ -38,9 +38,27 @@
   
   
   
+  <div class="card">
+    <img src="card-image.jpg" class="card-img-top" alt="Card Image">
+    <div class="card-body">
+      <h5 class="card-title">200 Tokens</h5>
+      <p class="card-text">Purchase 200 tokens for $1.</p>
+      <form method="POST" action="{% url 'purchase_tokens' %}">
+        {% csrf_token %}
+        <input type="hidden" name="token_count" value="200">
+        <button type="submit" class="btn btn-primary">Purchase</button>
+      </form>
+    </div>
+  </div>
   
   
   
 </main>
 
 {% endblock %}
+
+
+
+
+
+

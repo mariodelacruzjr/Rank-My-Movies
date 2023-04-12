@@ -4,3 +4,5 @@ migrations
 
 # Ignore media files
 media
+
+*.pyc

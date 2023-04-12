@@ -15,6 +15,48 @@ from django.contrib.auth.forms import UserCreationForm
 from django.dispatch import receiver
 from django.contrib.auth.signals import user_logged_in
 from django.contrib import messages
+from django.urls import reverse
+
+
+
+
+@login_required
+def purchase_tokens(request):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    cart_items1=[]
+    #ammount=200
+    cart_items1.append({
+        'price_data': {
+            'currency': 'usd',
+            'unit_amount': 1*100,
+            'product_data': {
+                'name': 'Tokens', 
+            },
+        },
+        'quantity': 1,
+    })
+
+    session=stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=cart_items1,
+        mode='payment',
+        success_url=request.build_absolute_uri(reverse('purchase_tokens')) + '?success=true',
+        cancel_url='http://localhost:8000/cancel/',
+    )
+
+    if request.GET.get('success'):
+        user_tokens = Token.objects.get(user=request.user).token_count
+        user_tokens += 200
+        token_obj = Token.objects.get(user=request.user)
+        token_obj.token_count = user_tokens
+        token_obj.save()
+
+        return render(request, 'success.html')
+
+    return render(request, 'purchase_tokens.html', {
+        'session_id': session.id,
+        'stripe_public_key': settings.STRIPE_PUBLIC_KEY
+    })
 
 @receiver(user_logged_in)
 def create_token(sender, user, request, **kwargs):
