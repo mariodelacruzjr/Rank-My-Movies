@@ -3,7 +3,6 @@ import requests
 import json
 import openai
 import stripe
-from django.contrib.auth import get_user_model
 from .models import MovieImage, Movie, Token
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
@@ -15,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.dispatch import receiver
 from django.contrib.auth.signals import user_logged_in
+
 @receiver(user_logged_in)
 def create_token(sender, user, request, **kwargs):
     # Check if the user already has a Token object
@@ -89,20 +89,26 @@ def add_to_cart(request, image_id):
 
     if cart_item:
         cart_item['quantity'] += 1
-        cart_item['price'] = float(cart_item['price']) + float(10)
+        cart_item['price'] = float(cart_item['price']) + float(request.POST.get('price'))
+        cart_item['size'] = request.POST.get('size') # Add selected size to cart
     else:
+        size = request.POST.get('size')
+        price = 10 if size == 'small' else 20 if size == 'medium' else 30
         cart[str(image_id)] = {
             'id': str(image.id),
             'title': image.movie.title,
             'image_url': image.image.url,
             'quantity': 1,
-            'price': float(10)
+            'price': float(price),
+            'size': size # Add selected size to cart
         }
 
     request.session['cart'] = cart
     print(f"cart is {cart}")
     print(f"cart items are {cart.items}")
     return redirect('cart_view')
+
+
 
 def cart_view(request):
     cart = request.session.get('cart', {})
@@ -175,7 +181,7 @@ def generate_image(request, mov_id):
     m_title = tmdb_response_json.get("title")
     # Try to retrieve a movie with the given mov_id from the database
     openai.api_key=settings.OPENAI_API_KEY
-    res = openai.Image.create(prompt=text_prompt, n=1, size="256x256")
+    res = openai.Image.create(prompt=text_prompt, n=1, size="1024x1024")
     image_url = res["data"][0]["url"]
     img_temp = NamedTemporaryFile()
     img_temp.write(urlopen(image_url).read())

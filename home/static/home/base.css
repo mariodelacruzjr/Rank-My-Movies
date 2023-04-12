@@ -15,4 +15,11 @@ body {
     color: white !important;
     
 }
+.card-text{
+    color: black;
+}
 
+.cart-poster-image{
+    max-width: 100px;
+    max-height: 100px;
+}

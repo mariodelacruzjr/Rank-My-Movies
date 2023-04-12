@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load mathfilters %}
+
 {% block content %}
     <div class="cart-display">
         <h1>Cart</h1>
@@ -8,6 +9,7 @@
                 <tr>
                     <th>Image</th>
                     <th>Title</th>
+                    <th>Size</th>
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Subtotal</th>
@@ -16,8 +18,9 @@
             <tbody>
                 {% for item in cart_items %}
                     <tr>
-                        <td><img src="{{ item.image_url }}" alt="{{ item.title }}"></td>
+                        <td><img src="{{ item.image_url }}" alt="{{ item.title }}" style="max-width: 100px; max-height: 100px;"></td>
                         <td>{{ item.title }}</td>
+                        <td>{{ item.size }}</td>
                         <td>${{ item.price }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>${{ item.price|floatformat:2 }}</td>
@@ -34,12 +37,13 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4" class="text-right"><strong>Total:</strong></td>
+                    <td colspan="5" class="text-right"><strong>Total:</strong></td>
                     <td><strong>${{ total|floatformat:2 }}</strong></td>
-                    <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+                    <td>
+                        <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+                    </td>
                 </tr>
             </tfoot>
         </table>
-    
     </div>
 {% endblock %}
