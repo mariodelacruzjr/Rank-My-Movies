@@ -3,7 +3,7 @@ import requests
 import json
 import openai
 import stripe
-from .models import MovieImage, Movie, Token
+from .models import MovieImage, FavoriteMovie, Token
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
 from django.views import View
@@ -171,8 +171,8 @@ class HomeView(View):
     def get(self, request):
         if request.user.is_authenticated:
             #user_favorites = Movie.objects.filter(user=request.user)
-            user_favorites = Movie.objects.filter(user=request.user).values_list('title', flat=True)
-            user_favorites1 = Movie.objects.filter(user=request.user).values_list('mov_id', flat=True)
+            user_favorites = FavoriteMovie.objects.filter(user=request.user).values_list('title', flat=True)
+            user_favorites1 = FavoriteMovie.objects.filter(user=request.user).values_list('mov_id', flat=True)
             print(user_favorites1)
             # Make a request to the TMDB API to get the trending movies from the past week
             response = requests.get(f'https://api.themoviedb.org/3/trending/movie/week?api_key={settings.TMDB_API_KEY}')
@@ -202,11 +202,18 @@ def register(request):
     # Render the registration page with the UserCreationForm
     return render(request, 'register.html', {'form': form})
 
+from django.contrib import messages
+
 def generate_image(request, mov_id):
-    user_tokens = Token.objects.get(user=request.user).token_count
+    try:
+        user_tokens = Token.objects.get(user=request.user).token_count
+    except Token.DoesNotExist:
+        user_tokens = 0
+
     if user_tokens < 20:
         messages.error(request, "You need at least 20 tokens to generate an image.")
         return redirect('home')
+
     # Use the movie description as the text prompt
     BASE_URL = f"https://api.themoviedb.org/3/"
     endpoint = f"movie/{mov_id}"
@@ -215,6 +222,7 @@ def generate_image(request, mov_id):
     tmdb_response_json = json.loads(tmdb_response.text)
     text_prompt = tmdb_response_json.get("overview")
     m_title = tmdb_response_json.get("title")
+
     # Try to retrieve a movie with the given mov_id from the database
     openai.api_key=settings.OPENAI_API_KEY
     res = openai.Image.create(prompt=text_prompt, n=1, size="1024x1024")
@@ -222,18 +230,20 @@ def generate_image(request, mov_id):
     img_temp = NamedTemporaryFile()
     img_temp.write(urlopen(image_url).read())
     img_temp.flush()
-    my_movie, created = Movie.objects.get_or_create(
+    my_movie, created = FavoriteMovie.objects.get_or_create(
         mov_id=mov_id, defaults={"title": m_title}
     )
     movie_image = MovieImage(movie=my_movie)
     movie_image.image.save(f"{my_movie.title}.jpg", img_temp)
 
     user_tokens -= 20
-    token_obj = Token.objects.get(user=request.user)
+    token_obj, created = Token.objects.get_or_create(user=request.user)
     token_obj.token_count = user_tokens
     token_obj.save()
+
     messages.success(request, "Image generated successfully. 20 tokens deducted from your account.")
     return render(request, "generated_image.html", {"movie_image": movie_image})
+
 
 def poster_design(request):
     if request.method == 'POST':
@@ -249,7 +259,7 @@ def poster_design(request):
 @login_required
 def favorites(request):
     # Get all the movies that belong to the logged-in user
-    movies = Movie.objects.filter(user=request.user)
+    movies = FavoriteMovie.objects.filter(user=request.user)
 
 
     # Create a context dictionary containing the list of movies
@@ -261,7 +271,7 @@ def favorites(request):
     return render(request, 'favorites.html', context)
 
 def delete_movie(request, movie_id):
-    movie = get_object_or_404(Movie, pk=movie_id)
+    movie = get_object_or_404(FavoriteMovie, pk=movie_id)
     
     if request.method == 'POST':
         movie.delete()
@@ -281,14 +291,14 @@ def save_movie(request):
         movie_poster_path = data.get('poster_path')
 
         # Check if the movie is already saved by the user
-        if Movie.objects.filter(user=request.user, mov_id=movie_id).exists():
+        if FavoriteMovie.objects.filter(user=request.user, mov_id=movie_id).exists():
             # Display a warning message using Django messages framework
             messages.warning(request, 'You have already saved this movie.')
             return redirect('favorites')
 
         # If the movie is not saved, save it to the database
         if movie_title and movie_overview and movie_poster_path:
-            movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user=request.user, mov_id=movie_id)
+            movie = FavoriteMovie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user=request.user, mov_id=movie_id)
             movie.save()
 
         # Display a success message using Django messages framework
@@ -337,5 +347,4 @@ class SearchResultsPageView(View):
         }
 
         return render(request, 'search_results.html', context)
-
 
