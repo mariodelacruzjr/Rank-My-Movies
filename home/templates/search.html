@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<div>
+    <div id="search-bar">
+        <h1 class="display-1">FIND YOUR MOVIE</h1>
+      <div>
+        <form method="post" action="{% url 'search_results' %}">
+          {% csrf_token %}
+          <div class="input-group">
+            <input type="text" class="form-control" name="search_query" placeholder="Search for movies...">
+            <div class="input-group-append">
+              <button class="btn btn-primary" type="submit">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  
+  
+
+
+  {% endblock %}

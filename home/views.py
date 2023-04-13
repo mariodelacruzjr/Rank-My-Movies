@@ -271,33 +271,32 @@ def delete_movie(request, movie_id):
 
 @login_required
 def save_movie(request):
-    # Check if the request method is POST
     if request.method == 'POST':
-        # Get the movie ID from the POST request
         movie_id = request.POST.get('movie_id')
-        
-        # Call The Movie Database API to get movie details
         endpoint = f'https://api.themoviedb.org/3/movie/{movie_id}'
         response = requests.get(endpoint, params={'api_key': settings.TMDB_API_KEY})
         data = response.json()
-        
-        # Get the movie title, overview, and poster path from the API response
         movie_title = data.get('title')
         movie_overview = data.get('overview')
         movie_poster_path = data.get('poster_path')
-        
-        
-        # Check if all required movie details are available
-        if movie_title and movie_overview and movie_poster_path:
 
-            # Create a new Movie object and save it to the database
-            movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user_id=request.user.id, mov_id=movie_id)
+        # Check if the movie is already saved by the user
+        if Movie.objects.filter(user=request.user, mov_id=movie_id).exists():
+            # Display a warning message using Django messages framework
+            messages.warning(request, 'You have already saved this movie.')
+            return redirect('favorites')
+
+        # If the movie is not saved, save it to the database
+        if movie_title and movie_overview and movie_poster_path:
+            movie = Movie(title=movie_title, overview=movie_overview, poster_path=movie_poster_path, user=request.user, mov_id=movie_id)
             movie.save()
+
+        # Display a success message using Django messages framework
+        messages.success(request, 'Movie saved successfully.')
         
         # Redirect the user to the favorites page
         return redirect('favorites')
-    
-    # If the request method is not POST, render the dashboard template
+
     return render(request, 'dashboard.html')
 
 from django.utils.decorators import method_decorator
