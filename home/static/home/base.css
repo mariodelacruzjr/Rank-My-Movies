@@ -33,3 +33,15 @@ body {
     width: 18rem;
     margin: auto;
 }
+
+
+#search-bar{
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+ }
+

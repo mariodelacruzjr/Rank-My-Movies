@@ -3,7 +3,7 @@ from django.contrib.auth.views import LoginView
 from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from django.conf import settings
-from .views import search_results, register, delete_movie, save_movie, purchase_tokens, favorites, HomeView, poster_design, generate_image, add_to_cart, cart_view, remove_from_cart, checkout, cancel, success
+from .views import register, delete_movie, save_movie, purchase_tokens, favorites, HomeView, poster_design, generate_image, SearchResultsPageView, add_to_cart, cart_view, remove_from_cart, checkout, cancel, success
 #from .views import get_token_count
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
@@ -12,7 +12,7 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('favorites/', favorites, name='favorites'),
     path('delete-movie/<int:movie_id>/', delete_movie, name='delete_movie'),
-    path('search/', search_results, name='search_results'),
+    path('search/', SearchResultsPageView.as_view(), name='search_results'),
     path('save_movie/', save_movie, name='save_movie'),
     path('poster_design/', poster_design, name='poster_design'),
     path('generate_image/<int:mov_id>/', generate_image, name='generate_image'),

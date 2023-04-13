@@ -7,6 +7,8 @@ from .models import MovieImage, Movie, Token
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
 from django.views import View
+from django.views.generic.base import View
+
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseNotAllowed
@@ -298,18 +300,19 @@ def save_movie(request):
     # If the request method is not POST, render the dashboard template
     return render(request, 'dashboard.html')
 
-@login_required
-def search_results(request):
-    # Check if the request method is POST
-    if request.method == 'POST':
-        # Get the search query from the form data
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+@method_decorator(login_required, name='dispatch')
+class SearchResultsPageView(View):
+    def get(self, request):
+        return render(request, 'search.html')
+
+    def post(self, request):
         query = request.POST.get('search_query')
-        
-        # If the search query is empty, render the search page again
+
         if not query:
-            return render(request, 'search.html')
-            
-        # Set up API parameters and make request to The Movie Database API
+            return render(request, 'search_results.html')
+
         endpoint = f'https://api.themoviedb.org/3/search/movie'
         params = {
             'api_key': settings.TMDB_API_KEY,
@@ -318,7 +321,6 @@ def search_results(request):
         response = requests.get(endpoint, params=params)
         results = response.json()['results']
 
-        # Process the results from the API and create a list of movies
         movies = []
         for movie in results:
             if movie['poster_path']:
@@ -330,17 +332,11 @@ def search_results(request):
                 }
                 movies.append(movie_data)
 
-        # Create a context dictionary containing the list of movies and the search query
         context = {
             'movies': movies,
             'search_query': query
         }
 
-        # Render the results page with the list of movies and the search query
         return render(request, 'search_results.html', context)
-
-    # If the request method is not POST, render the dashboard page
-    return render(request, 'dashboard.html')
-
 
 
