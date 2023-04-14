@@ -1,4 +1,3 @@
-
 import requests
 import json
 import openai
@@ -7,8 +6,6 @@ from .models import MovieImage, FavoriteMovie, Token
 from django.core.files.temp import NamedTemporaryFile
 from urllib.request import urlopen
 from django.views import View
-from django.views.generic.base import View
-
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.http import HttpResponseNotAllowed
@@ -22,49 +19,66 @@ from django.urls import reverse
 
 
 
+
 @login_required
 def purchase_tokens(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
-    cart_items1=[]
-    #ammount=200
-    cart_items1.append({
+    token_price=1
+    token_ammount=200
+    cart_items=[]
+    cart_items.append({
         'price_data': {
             'currency': 'usd',
-            'unit_amount': 1*100,
+            'unit_amount': token_price*100,
             'product_data': {
-                'name': 'Tokens', 
+                'name': f'{token_ammount} Tokens', 
             },
         },
         'quantity': 1,
     })
 
-    session=stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=cart_items1,
-        mode='payment',
-        success_url=request.build_absolute_uri(reverse('purchase_tokens')) + '?success=true',
-        cancel_url='http://localhost:8000/cancel/',
-    )
+    try:
+        session=stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=cart_items,
+            mode='payment',
+            success_url=request.build_absolute_uri(reverse('purchase_tokens')) + '?success=true',
+            cancel_url='http://localhost:8000/cancel/',
+        )
+    except stripe.error.StripeError as e:
+        # Display an error message to the user
+        messages.error(request, "An error occurred while processing your payment. Please try again later.")
+        return redirect('home')
+        
 
     if request.GET.get('success'):
-        user_tokens = Token.objects.get(user=request.user).token_count
-        user_tokens += 200
-        token_obj = Token.objects.get(user=request.user)
-        token_obj.token_count = user_tokens
-        token_obj.save()
+        # Add tokens to the user's token count
+        try:
+            token_obj = Token.objects.get(user=request.user)
+            user_tokens = token_obj.token_count
+            user_tokens += token_ammount
+            token_obj.token_count = user_tokens
+            token_obj.save()
+        except Token.DoesNotExist:
+            # If the user doesn't have a token object, create one
+            token_obj = Token.objects.create(user=request.user, token_count=0)
+            messages.error(request, "An error occurred with your tokens. Please try again later.")
+            return redirect('home')
+        messages.success(request, f"{token_ammount} Tokens purchased successfully!")
+        return redirect('home')
 
-        return render(request, 'success.html')
-
+    # Render purchase page
     return render(request, 'purchase_tokens.html', {
         'session_id': session.id,
         'stripe_public_key': settings.STRIPE_PUBLIC_KEY
     })
 
+
+
+
 @receiver(user_logged_in)
 def create_token(sender, user, request, **kwargs):
-    # Check if the user already has a Token object
     if not Token.objects.filter(user=user).exists():
-        # If the user does not have a Token object, create one with 0 tokens
         token = Token.objects.create(user=user, token_count=0)
 
 def checkout(request):
