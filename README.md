@@ -44,7 +44,7 @@ Additionally, don't forget to handle your Django secret key for enhanced project
 
 6. python manage.py makemigrations home
 
-7. python manage.py migrate
+7. python manage.py migrate home
 
 8. python manage.py runserver
 
