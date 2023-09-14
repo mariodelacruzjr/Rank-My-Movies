@@ -1,0 +1,6 @@
+Django==3.2.7
+django-mathfilters
+requests
+openai
+stripe
+Pillow
