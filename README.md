@@ -23,7 +23,7 @@ Before you begin, ensure you have met the following requirements:
    
    git clone https://github.com/mariodelacruzjr/Smart-Movie-Posters.git
 
-2. cd your-repo
+2. cd Smart-Movie-Posters
 
 3. pip install -r requirements.txt
 
