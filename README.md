@@ -49,28 +49,37 @@ Additionally, don't forget to handle your Django secret key for enhanced project
 8. To create a superuser (admin) account and increase the `token_count` attribute to 300, follow these steps:.
 
    1. Import the necessary models
-   py manage.py shell
-   from django.contrib.auth.models import User
-   from home.models import Token
+      py manage.py shell
    
-   2. Create a superuser (admin) account
-   user = User.objects.create_superuser('username', 'email', 'password')
-   user.save()
+      from django.contrib.auth.models import User
+      
+      from home.models import Token
    
-   3. Create a Token object associated with the user
-   token = Token(user=user)
-   token.save()
+   3. Create a superuser (admin) account
+      
+      user = User.objects.create_superuser('username', 'email', 'password')
    
-   4. Increase the token_count attribute to 300
-   token.token_count = 300
-   token.save()
+      user.save()
    
-   5. Exit the Django shell
-   exit()
+   4. Create a Token object associated with the user
+      
+      token = Token(user=user)
+      
+      token.save()
+   
+   6. Increase the token_count attribute to 300
+      
+      token.token_count = 300
+      
+      token.save()
+   
+   8. Exit the Django shell
+      
+      exit()
 
-9. python manage.py runserver
+10. python manage.py runserver
 
-10. Access the Smart Movie Poster project in your web browser by navigating to http://localhost:8000/.
+11. Access the Smart Movie Poster project in your web browser by navigating to http://localhost:8000/.
 
 ## Built With
 
