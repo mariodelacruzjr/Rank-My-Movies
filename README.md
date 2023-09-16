@@ -46,34 +46,34 @@ Additionally, don't forget to handle your Django secret key for enhanced project
 
 7. python manage.py migrate
 
-8. To create a superuser (admin) account and increase the `token_count` attribute to 300, follow these steps:.
+8. To create a superuser (admin) account and increase the `token_count` attribute to 300, follow these steps:
 
    1. Import the necessary models
+      ```bash
       py manage.py shell
-   
       from django.contrib.auth.models import User
-      
       from home.models import Token
    
    3. Create a superuser (admin) account
+      ```bash
       
       user = User.objects.create_superuser('username', 'email', 'password')
-   
       user.save()
    
-   4. Create a Token object associated with the user
+   5. Create a Token object associated with the user
+      ```bash
       
       token = Token(user=user)
-      
       token.save()
    
-   6. Increase the token_count attribute to 300
+   7. Increase the token_count attribute to 300
+      ```bash
       
       token.token_count = 300
-      
       token.save()
    
-   8. Exit the Django shell
+   9. Exit the Django shell
+       ```bash
       
       exit()
 
