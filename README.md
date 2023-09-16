@@ -20,12 +20,16 @@ Before you begin, ensure you have met the following requirements:
 ### Installing
 
 1. Clone the repository:
-   
+   ```bash
    git clone https://github.com/mariodelacruzjr/Smart-Movie-Posters.git
 
-2. cd Smart-Movie-Posters
+2. Change directory
+   ```bash
+   cd Smart-Movie-Posters
 
-3. pip install -r requirements.txt
+3. Install requirements file
+   ```bash
+   pip install -r requirements.txt
 
 4. Create a database and configure database settings in settings.py.
 
@@ -42,11 +46,12 @@ To ensure the proper functioning of the Smart Movie Poster project, you'll need 
 Additionally, don't forget to handle your Django secret key for enhanced project security.
 
 
-6. python manage.py makemigrations home
+6. Apply database migrations
+   ```bash
+   python manage.py makemigrations home
+   python manage.py migrate
 
-7. python manage.py migrate
-
-8. To create a superuser (admin) account and increase the `token_count` attribute to 300, follow these steps:
+7. To create a superuser (admin) account and increase the `token_count` attribute to 300, follow these steps:
 
    1. Import the necessary models
       ```bash
@@ -54,32 +59,33 @@ Additionally, don't forget to handle your Django secret key for enhanced project
       from django.contrib.auth.models import User
       from home.models import Token
    
-   3. Create a superuser (admin) account
+   2. Create a superuser (admin) account
       ```bash
       
       user = User.objects.create_superuser('username', 'email', 'password')
       user.save()
    
-   5. Create a Token object associated with the user
+   3. Create a Token object associated with the user
       ```bash
       
       token = Token(user=user)
       token.save()
    
-   7. Increase the token_count attribute to 300
+   4. Increase the token_count attribute to 300
       ```bash
       
       token.token_count = 300
       token.save()
    
-   9. Exit the Django shell
-       ```bash
-      
+   5. Exit the Django shell
+      ```bash
       exit()
 
-10. python manage.py runserver
+8. Start the Django development server
+    ```bash
+    python manage.py runserver
 
-11. Access the Smart Movie Poster project in your web browser by navigating to http://localhost:8000/.
+9. Access the Smart Movie Poster project in your web browser by navigating to http://localhost:8000/.
 
 ## Built With
 
