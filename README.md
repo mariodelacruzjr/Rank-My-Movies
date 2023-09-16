@@ -19,21 +19,21 @@ Before you begin, ensure you have met the following requirements:
 
 ### Installing
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/mariodelacruzjr/Smart-Movie-Posters.git
+#### 1. Clone the repository:
+      
+      git clone https://github.com/mariodelacruzjr/Smart-Movie-Posters.git
 
-2. Change directory
-   ```bash
-   cd Smart-Movie-Posters
+#### 2. Change directory
+      
+      cd Smart-Movie-Posters
 
-3. Install requirements file
-   ```bash
-   pip install -r requirements.txt
+#### 3. Install requirements file
+   
+      pip install -r requirements.txt
 
-4. Create a database and configure database settings in settings.py.
+#### 4. Create a database and configure database settings in settings.py.
 
-5. Configure API Keys
+#### 5. Configure API Keys
 
 To ensure the proper functioning of the Smart Movie Poster project, you'll need to configure the following API keys securely:
 
@@ -46,46 +46,46 @@ To ensure the proper functioning of the Smart Movie Poster project, you'll need 
 Additionally, don't forget to handle your Django secret key for enhanced project security.
 
 
-6. Apply database migrations
-   ```bash
-   python manage.py makemigrations home
-   python manage.py migrate
+#### 6. Apply database migrations
+   
+      python manage.py makemigrations home
+      python manage.py migrate
 
-7. To create a superuser (admin) account and increase the `token_count` attribute to 300, follow these steps:
+#### 7. To create a superuser (admin) account and increase the `token_count` attribute to 300, follow these steps:
 
-   1. Import the necessary models
-      ```bash
+   ##### I. Import the necessary models
+      
       py manage.py shell
       from django.contrib.auth.models import User
       from home.models import Token
    
-   2. Create a superuser (admin) account
-      ```bash
+  ##### II. Create a superuser (admin) account
+     
       
       user = User.objects.create_superuser('username', 'email', 'password')
       user.save()
    
-   3. Create a Token object associated with the user
-      ```bash
+   ##### III. Create a Token object associated with the user
+      
       
       token = Token(user=user)
       token.save()
-   
-   4. Increase the token_count attribute to 300
-      ```bash
+    
+   ##### IV. Increase the token_count attribute to 300
+     
       
       token.token_count = 300
       token.save()
    
-   5. Exit the Django shell
-      ```bash
+   ##### V. Exit the Django shell
+      
       exit()
 
-8. Start the Django development server
-    ```bash
+#### 8. Start the Django development server
+    
     python manage.py runserver
 
-9. Access the Smart Movie Poster project in your web browser by navigating to http://localhost:8000/.
+#### 9. Access the Smart Movie Poster project in your web browser by navigating to http://localhost:8000/.
 
 ## Built With
 
