@@ -54,7 +54,7 @@ from django.contrib.auth.models import User
 from home.models import Token
 
 # Create a superuser (admin) account
-user = User.objects.create_superuser('<username>', '<email>', '<password>')
+user = User.objects.create_superuser('username', 'email', 'password')
 user.save()
 
 # Create a Token object associated with the user
